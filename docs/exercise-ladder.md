@@ -18,10 +18,10 @@ have an idea for what the knob should do, ask the AI how to get there from the s
 flowchart TD
     START(["Starter flashed<br/>title · counter · tap · ring · click · RSSI"]):::start
 
-    START --> LOOK{{"I want a screen<br/>that is mine"}}:::goal
-    START --> FEEL{{"I want it to answer<br/>my hands"}}:::goal
-    START --> TRUST{{"I want code<br/>I can trust"}}:::goal
-    START --> ONLINE{{"I want it<br/>on the network"}}:::goal
+    START --> LOOK(["I want a screen<br/>that is mine"]):::goal
+    START --> FEEL(["I want it to answer<br/>my hands"]):::goal
+    START --> TRUST(["I want code<br/>I can trust"]):::goal
+    START --> ONLINE(["I want it<br/>on the network"]):::goal
 
     LOOK --> R1["<b>1</b> Hello screen"]:::ui
     R1 --> R4["<b>4</b> Colour = state"]:::ui
@@ -36,9 +36,9 @@ flowchart TD
     R2 -. "logic to extract" .-> R6
 
     ONLINE --> R7["<b>7</b> Join Wi-Fi,<br/>show RSSI"]:::net
-    R7 --> SHOW{{"show a value<br/>from elsewhere"}}:::goal
-    R7 --> SEND{{"send a lot<br/>of data out"}}:::goal
-    R7 --> CALL{{"let other devices<br/>call the knob"}}:::goal
+    R7 --> SHOW(["show a value<br/>from elsewhere"]):::goal
+    R7 --> SEND(["send a lot<br/>of data out"]):::goal
+    R7 --> CALL(["let other devices<br/>call the knob"]):::goal
 
     SHOW --> R8["<b>8</b> GET a JSON value<br/>and render it"]:::net
     SEND --> R9["<b>9</b> Stream 2 MB with<br/>a progress arc"]:::net
