@@ -13,7 +13,7 @@ have an idea for what the knob should do, ask the AI how to get there from the s
 
 ```mermaid
 %%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 28, "rankSpacing": 46},
-  "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "15px",
+  "themeVariables": {"fontFamily": "Noto Sans, Helvetica Neue, Helvetica, Arial, sans-serif", "fontSize": "15px",
   "lineColor": "#8a94a6", "edgeLabelBackground": "#ffffff"}}}%%
 flowchart TD
     START(["Starter flashed<br/>title · counter · tap · ring · click · RSSI"]):::start
@@ -249,15 +249,30 @@ Widgets live in `components/app/app_screen.c`, behaviour in `components/app/app.
 4. "Just fix the warnings." — Strapping warnings on GPIO45/46 are expected; "fixing" them
    breaks the mic and sometimes the boot.
 
+<style>
+  .rung-map { cursor: zoom-in; }
+  .rung-map.zoomed { position: fixed; inset: 0; z-index: 10; margin: 0; padding: 24px; overflow: auto;
+                     background: #fff; cursor: zoom-out; }
+  .rung-map.zoomed svg { max-width: none !important; width: 1300px; height: auto; display: block; margin: 0 auto; }
+  .rung-map p { margin: 0; }
+</style>
 <script type="module">
   // The published site does not draw mermaid blocks by itself; this turns the block at the top into the graph.
+  // Click the graph to see it full size, click again (or a rung) to go back.
   import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
   document.querySelectorAll("div.language-mermaid, pre > code.language-mermaid").forEach((block) => {
     const graph = document.createElement("div");
-    graph.className = "mermaid";
+    graph.className = "mermaid rung-map";
+    graph.title = "Click to enlarge";
     graph.textContent = block.textContent;
+    graph.addEventListener("click", (e) => {
+      if (e.target.closest("a")) graph.classList.remove("zoomed");
+      else graph.classList.toggle("zoomed");
+    });
     (block.tagName === "CODE" ? block.parentElement : block).replaceWith(graph);
   });
-  mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+  mermaid.initialize({ startOnLoad: false, securityLevel: "loose",
+    fontFamily: "Noto Sans, Helvetica Neue, Helvetica, Arial, sans-serif" });
+  await document.fonts.ready;   // measure labels with the font they are drawn in
   mermaid.run();
 </script>
