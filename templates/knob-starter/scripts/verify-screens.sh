@@ -3,7 +3,7 @@
 # device shows: the LVGL framebuffer (snap) and, if a camera script is given, the webcam. One
 # directory of evidence per run; exits 1 on a model mismatch. Extend the list when you add a state.
 #   scripts/verify-screens.sh [out_dir]
-#   KNOB_CAM=/path/to/verify-on-device/scripts/capture.sh   # optional webcam capture per step
+#   KNOB_CAM=/path/to/verify-with-webcam/scripts/capture.sh # optional webcam capture per step
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="${1:-$ROOT/build/verify}"

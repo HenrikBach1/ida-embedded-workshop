@@ -1,6 +1,6 @@
 # Install card — plugin + toolchain
 
-Repo: `https://github.com/dalager/ida-embedded-workshop`. The plugin is eight plain-Markdown skills plus a
+Repo: `https://github.com/dalager/ida-embedded-workshop`. The plugin is nine plain-Markdown skills plus a
 starter template; it needs nothing Claude-specific and works in any Agent-Skills-aware tool.
 
 ## 1. Install the plugin in your AI tool
@@ -28,7 +28,7 @@ Start a new session. `codex plugin marketplace upgrade ida-embedded-workshop` fe
 ```bash
 copilot plugin marketplace add dalager/ida-embedded-workshop
 copilot plugin install ida-embedded-workshop@ida-embedded-workshop
-copilot skill list        # should list the eight ida-embedded-workshop skills
+copilot skill list        # should list the nine ida-embedded-workshop skills
 ```
 
 **Cursor**

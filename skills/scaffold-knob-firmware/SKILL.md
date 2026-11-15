@@ -184,7 +184,7 @@ it holds the spine / detail / overlay model and the LVGL shapes for swipe and kn
   answer must be the board header, `idf_component.yml`, or the IDF docs for 5.3.
 - When it proposes a new file, ask which component owns it and what its header says.
 - Before accepting a change, run the done checklist in `firmware-code-organisation`, and
-  prove it on the board with `verify-on-device` (walk + snapshot, camera if there is one).
+  prove it on the board with `verify-on-device` (walk + snapshot), then look at the panel.
 
 ## 8. Troubleshooting
 
@@ -199,4 +199,4 @@ it holds the spine / detail / overlay model and the LVGL shapes for swipe and kn
 | `Out of buffer` from HTTP client | Long URL: raise `buffer_size_tx` to 2048 |
 | Build fails on a `lv_*` symbol | LVGL 8 API; look the LVGL 9 name up in `managed_components/lvgl__lvgl` |
 | `testctl.py`: no reply | A terminal holds `/dev/ttyACM0`, or the console is not on USB Serial/JTAG (sdkconfig.defaults) |
-| Panel black, log says `ready` | Rendering never reached the panel (a 120 px font did this); the camera, not the log, catches it |
+| Panel black, log says `ready` | Rendering never reached the panel (a 120 px font did this); your eyes, not the log or the snapshot, catch it |

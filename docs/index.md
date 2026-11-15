@@ -28,3 +28,4 @@ already use. This site holds the workshop material; the plugin itself lives in t
 - [backend-integration-patterns](skills/backend-integration-patterns/SKILL.html)
 - [round-display-ux-navigation](skills/round-display-ux-navigation/SKILL.html)
 - [verify-on-device](skills/verify-on-device/SKILL.html)
+- [verify-with-webcam](skills/verify-with-webcam/SKILL.html) (optional, advanced)

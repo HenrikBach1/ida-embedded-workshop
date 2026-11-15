@@ -16,7 +16,8 @@ from a production firmware on the same board. Nothing in it depends on one AI ve
 | `networking-under-memory-constraints` | Wi-Fi, HTTP, streaming uploads and serving simple HTTP requests without exhausting internal RAM, rungs 7–11 |
 | `backend-integration-patterns` | A second device joins (shared contract, secret, event ids on a LAN), or you need a backend: pairing, tokens, resumable upload, contract-first API |
 | `round-display-ux-navigation` | Adding screens, lists, details, back, idle timeout; swipe + knob navigation on a round panel |
-| `verify-on-device` | Proving a change on the real board: serial test console (inject knob/tap/hold, read state), pixel-exact LVGL snapshot over USB, webcam check |
+| `verify-on-device` | Proving a change on the real board: serial test console (inject knob/tap/hold, read state), pixel-exact LVGL snapshot over USB |
+| `verify-with-webcam` | Optional, advanced: a webcam pointed at the knob so the laptop can see the physical panel (backlight, a frame that never reached the glass) |
 
 `templates/knob-starter/` is the firmware the scaffold skill copies: board header, display and
 touch bring-up, knob decoder, theme tokens, haptic, a trimmed networking component with a
@@ -30,8 +31,9 @@ backend.
 </p>
 
 Every screenshot here is a pixel-exact LVGL framebuffer pulled over USB by the template's serial
-test console. The `verify-on-device` skill pairs that with a webcam frame of the real panel, which
-is the only thing that catches a frame that never reached the glass:
+test console (the `verify-on-device` skill). For those who want it, the optional
+`verify-with-webcam` skill pairs that with a webcam frame of the real panel, which catches a
+frame that never reached the glass when nobody is looking at the knob:
 
 <p align="center">
   <img src="docs/images/verify-snapshot-vs-camera.jpg" width="480" alt="Left: LVGL snapshot of the active state over USB. Right: the same state seen by a webcam pointed at the knob">
