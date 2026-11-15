@@ -36,7 +36,7 @@ The board header in the starter template is the only place pin numbers belong in
 
 | Other | GPIO | Notes |
 |---|---|---|
-| PDM mic clock / data | 45 / 46 | Strapping pins; inputs only, fine |
+| PDM mic clock / data | 45 / 46 | Strapping pins; clock out, data in, fine |
 | Battery / rail sense | 1 | ADC1_CH0, ×2 divider on the **system rail**, not the cell |
 | USB D− / D+ | 19 / 20 | Native USB-Serial/JTAG |
 
@@ -94,7 +94,10 @@ esptool --chip esp32s3 --port /dev/ttyACM0 --no-stub \
    shared by Wi-Fi, lwIP, mbedTLS and task stacks. Keep LVGL's pool in PSRAM, keep the draw
    buffer small (~20 rows) and internal, stream uploads through one 16 KB chunk.
 5. **No TE line** means tearing on full-screen animations. Partial refresh, calm motion.
-6. **Strapping warnings on 45/46 are normal.** They are mic inputs. Do not "fix" them.
+6. **Strapping warnings on 45/46 are normal.** They are the mic pins. Do not "fix" them.
 7. **Touch and haptic share one I2C bus.** Init the bus once; the DRV2605L is at 0x5A.
 8. **The backlight is dark until driven.** GPIO47 has a pull-down; if the screen is black after
    flashing, check the LEDC init before suspecting the panel.
+9. **The mic stream has a big DC offset** (about +1200 of 32768) and the S3 does not filter it.
+   A level computed from raw samples reads −28 dBFS forever and looks like a dead mic. Subtract
+   the DC first; a quiet room is then around −75 dBFS. The mic also hears the haptic motor.

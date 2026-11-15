@@ -6,7 +6,8 @@ description: >
   written, reviewed or debugged: pin numbers, which pins must never be driven, what the board
   does not have, which USB orientation reaches which chip, and how to flash it. Also use when
   someone says "the knob", "K518", "ST77916", "CST816", "which GPIO", "it won't flash", or
-  "the display stays dark". Every pin here was verified on a real unit; do not substitute pins
+  "the display stays dark", "the mic is dead", "the microphone hears nothing", "sound level".
+  Every pin here was verified on a real unit; do not substitute pins
   from memory, from the older K718C board, or from an ESPHome forum post.
 ---
 
@@ -20,7 +21,8 @@ Source of truth for every number below: the Waveshare schematic and ESP-IDF demo
 on a real unit (I2C scan, SD mount, knob events, touch, mic, backlight, haptics). The full pin
 list is in `references/pinmap.md`; the same values live as macros in
 `templates/knob-starter/components/board/include/board_jc3636k518c.h`, which is the **only**
-place pins may appear in code.
+place pins may appear in code. Before writing or debugging anything that reads the microphone,
+read `references/microphone.md`.
 
 ## What it has
 
@@ -31,7 +33,7 @@ place pins may appear in code.
 | Haptics | DRV2605L + LRA | I2C0 @ 0x5A | I2C-only control, ~120 library effects |
 | Knob | 2 detector switches (SSCM110100) | 2 GPIO | One switch pair on the S3, the other on the sidecar |
 | microSD | TF slot, SDMMC 4-bit | 6 GPIO | Shipped 480 MB card; units vary in quality |
-| Microphone | MSM261D4030H1CPM PDM | 2 GPIO | Mono, 16 kHz works |
+| Microphone | MSM261D4030H1CPM PDM | 2 GPIO | Mono, LEFT slot, 16–48 kHz. Raw stream has a large DC offset: block DC before measuring level |
 | Audio out | PCM5100A I2S DAC, line-level | 3 GPIO + mux | 3.5 mm jack only; **no amplifier, no speaker** |
 | Backlight | AO3400A low-side switch | GPIO47 | 10 kΩ pull-down: dark until driven; LEDC PWM at 20 kHz works |
 | Battery sense | 10k/10k divider from the 5 V rail | GPIO1 (ADC1_CH0) | Reads the system rail ×2, not the cell |
@@ -52,7 +54,7 @@ place pins may appear in code.
 | **0** | Triple-booked: BOOT strap, select line of the CH445P I2S mux (high = S3 owns the DAC), and exposed on the 10-pin header. On-board pull-up. **Never configure or drive it.** |
 | 38, 48 | UART to the sidecar (S3 TX 38, RX 48). Reserved. |
 | 39, 40, 41 | I2S to the DAC (BCK, WS, DOUT). Unused by the starter; reserved. |
-| 45, 46 | Mic clock and data. Both are S3 strapping pins; as inputs they are fine. Never pull 46 up at boot. |
+| 45, 46 | Mic clock (output from the S3) and data (input). Both are S3 strapping pins; for the mic they are fine. Never pull 46 up at boot. |
 | 19, 20 | Native USB D−/D+. |
 
 The sidecar owns the DAC soft-mute line, so line-out audio from the S3 only works if the stock
@@ -122,7 +124,13 @@ full flash, an app-only flash (just the `0x10000` image) is enough for code chan
    before relying on storage.
 9. **The battery ADC reads the 5 V rail**, so on USB it reports ~4.6 V regardless of the cell.
    Any percentage is a heuristic; calibrate per unit if you need it.
-10. **Two radios on one band.** The sidecar's Bluetooth stack transmits while it runs stock
+10. **A silent mic is almost always a metering bug.** The S3's PDM decimator has no high-pass
+    filter and this mic idles at about +1200 LSB of DC, so RMS over raw samples sits at
+    −28 dBFS whether the room is silent or someone is clapping. One unit was written off as
+    hardware-defective on exactly that reading. Remove DC first, look at every block, and
+    remember the mic hears the haptic motor. Numbers, filter and a self-test in
+    `references/microphone.md`.
+11. **Two radios on one band.** The sidecar's Bluetooth stack transmits while it runs stock
     firmware and will degrade S3 Wi-Fi throughput. Harmless on USB, a real tax on battery.
 
 ## Boot checklist for a new firmware

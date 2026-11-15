@@ -40,6 +40,8 @@
 #define BOARD_SD_D3             2
 
 // --- PDM microphone (MSM261D4030H1CPM, same part as the K718) ---
+// CLK is an output (I2S PDM RX master), DIN an input; mono, LEFT slot. The S3 decimator has no
+// high-pass and the idle stream sits near +1200 LSB: remove DC before computing any level.
 #define BOARD_MIC_CLK           45
 #define BOARD_MIC_DIN           46
 

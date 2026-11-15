@@ -101,4 +101,5 @@ plan is wrong, not the pixels.
 | `corrupt row N (log noise…)` | A write slipped into the stream; snapshot code must mute logs and write rows atomically |
 | Snapshot shows a half-drawn arc | Snapped mid-animation; raise `KNOB_SETTLE` |
 | Walk passes once, fails on rerun | It assumes boot state; start with `reset` |
+| A sensor "never responds" (mic, ADC, touch) | Check the measurement before the part. Prove the test can see the effect: fire a stimulus the board controls (the haptic motor is one for the mic) and look at raw samples, not a derived level. See `jc3636k518-device/references/microphone.md` |
 | Snapshot fine, panel black | Rendering never reached the panel: font, flush, backlight. Trust the person looking at it |

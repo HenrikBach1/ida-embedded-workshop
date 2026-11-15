@@ -115,6 +115,8 @@ These are the mistakes generated code made on real projects here. Check for them
 | **Driving GPIO0** | "Set the I2S mux to the S3 side" | Never. The on-board pull-up already selects the S3. |
 | **Blocking inside LVGL callbacks** | HTTP GET inside a button event | Post to the network task; update the UI from a callback under the lock. |
 | **Whole-file buffers** | `malloc(file_size)` before upload | Stream through one 16 KB chunk; see `networking-under-memory-constraints`. |
+| **Level from raw PDM samples** | RMS straight over `i2s_channel_read` output; a "calibrated baseline" of −28 dBFS that never moves; `hp_en` set on the S3 (ESP32-only) | Block DC before any level maths and publish a peak-hold, not the latest block. See `jc3636k518-device/references/microphone.md`. |
+| **"The hardware is defective"** | A long, careful chain of electrical checks ending in an RMA recommendation, where the last link was measured with a metric that could not show the effect | A negative result needs a positive control. Ask what the reading would look like if the part worked, then produce a stimulus and look at raw data. |
 | **Wrong IDF version idioms** | Legacy `driver/i2c.h` instead of `driver/i2c_master.h`; `esp_netif_sntp` missing on old IDF | The template is IDF 5.3; use the new I2C master driver and LEDC APIs as written there. |
 
 ### Verification routine (run before trusting generated code)

@@ -57,7 +57,9 @@ The second pair (EC2) is wired to the sidecar ESP32 (its IO19/IO22) and is not n
 | Clock | 45 | `BOARD_MIC_CLK` |
 | Data | 46 | `BOARD_MIC_DIN` |
 
-Both are strapping pins; fine as inputs.
+Clock is an output from the S3 (I2S PDM RX, master), data is an input. Both are strapping
+pins; fine for this use. Configuration, expected levels and the DC-offset trap are in
+`microphone.md`.
 
 ## Audio out — I2S to the PCM5100A via a CH445P mux
 
