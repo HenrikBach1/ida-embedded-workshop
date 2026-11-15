@@ -1,8 +1,9 @@
 #pragma once
 // app — the "hello world" state machine: knob turns a counter, tap toggles IDLE/ACTIVE, long press
-// streams a 2 MiB generated payload to the receiver. Depends on ui, theme, haptic, net; nothing
-// depends on app. Everything LVGL happens on the LVGL task; the upload runs on its own task and
-// reports back through atomics that a 200 ms LVGL timer reads (app.c explains why).
+// streams a 2 MiB generated payload to the receiver, and a body POSTed to the knob shows its size.
+// Depends on ui, theme, haptic, net; nothing depends on app. Everything LVGL happens on the LVGL
+// task; the upload and the HTTP server run on their own tasks and report back through atomics
+// that a 200 ms LVGL timer reads (app.c explains why).
 #include <stdint.h>
 #include <stddef.h>
 

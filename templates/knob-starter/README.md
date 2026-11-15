@@ -12,11 +12,13 @@ components/board/   pins + capabilities (the ONLY place a GPIO number may appear
 components/ui/      ST77916 + CST816 + LVGL bring-up, knob driver, backlight, Muli 28 font
 components/theme/   design tokens (tokens.h) + colour = state policy, no LVGL dependency
 components/haptic/  DRV2605L on the touch I2C bus
-components/net/     Wi-Fi STA, buffered GET, streamed PUT through one 16 KB PSRAM chunk
-components/app/     the hello-world state machine (app.c), its screen, its upload exercise
+components/net/     Wi-Fi STA, buffered GET, streamed PUT through one 16 KB PSRAM chunk,
+                    HTTP server (GET /status, POST /data) with host-tested admission rules
+components/app/     the hello-world state machine (app.c), its screen, its upload exercise,
+                    its sink for data POSTed to the knob (app_serve.c)
 components/testctl/ dev-only serial test console (CONFIG_KNOB_TESTCTL): inject knob/tap/hold, snapshot
 main/main.c         boot order
-test/host/          Unity suites: board pins, knob decoder, theme wiring, upload part maths
+test/host/          Unity suites: board pins, knob decoder, theme wiring, upload part maths, server admission rules
 scripts/            build.sh (Docker), flash.sh (host esptool), test.sh (gcc), gen-fonts.sh,
                     testctl.py + verify-screens.sh (drive the device over USB, see verify-on-device)
 design/             tokens.json / tokens.h, principles.md, fonts + OFL licences
@@ -53,7 +55,7 @@ Image 1.36 MB of a 9 MB app partition; LVGL's 128 KB pool lives in PSRAM.
 | backlight | `backlight_init()`, `backlight_set_percent(pct)` |
 | theme | `theme_state_color(state)`, `theme_state_motion_ms(state)`; tokens `HUD_*` |
 | haptic | `haptic_init(bus)`, `haptic_click()`, `haptic_play(effect)` |
-| net | `net_init()`, `net_is_connected()`, `net_wait_connected(ms)`, `net_rssi()`, `net_wifi_join(ssid, pass)`, `net_http_get(url, buf, cap)`, `net_http_put_stream(url, len, rewind_cb, read_cb, ctx, progress_cb)`, `net_set_result_cb(cb)` |
+| net | `net_init()`, `net_is_connected()`, `net_wait_connected(ms)`, `net_rssi()`, `net_wifi_join(ssid, pass)`, `net_http_get(url, buf, cap)`, `net_http_put_stream(url, len, rewind_cb, read_cb, ctx, progress_cb)`, `net_set_result_cb(cb)`, `net_serve_start(sink, max_body)` |
 | app | `app_init()`; states `APP_IDLE / ACTIVE / UPLOADING / DONE / ERROR`; test hooks `app_inject_knob/tap/hold/reset()`, `app_state_line()` |
 | testctl | `testctl_init()` — USB Serial/JTAG console: `knob ±N`, `tap`, `hold`, `reset`, `state`, `snap`, `ping` |
 
@@ -74,6 +76,8 @@ shared chunk; every pin is a `BOARD_*` macro.
 8. **GET JSON** — `net_http_get()` a value (e.g. a time API) from a network task; render it.
 9. **Stream 2 MiB** — hold the screen; watch the arc and `heap[before put]` / `heap[after put]`.
 10. **Survive a drop** — pull the AP mid-upload; add `X-Offset` resume using the receiver's GET.
+11. **Be called** (stretch) — `curl --data '{"value":42}' http://<knob-ip>/data`; keep the body in
+    the sink (`app_serve.c`), parse and show the number on the LVGL tick.
 
 After each rung, extend `scripts/verify-screens.sh` with the state you added and run it.
 

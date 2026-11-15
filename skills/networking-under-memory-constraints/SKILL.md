@@ -2,11 +2,14 @@
 name: networking-under-memory-constraints
 description: >
   Wi-Fi and HTTP on the ESP32-S3 knob board without running out of internal RAM: join a
-  network, fetch JSON, and stream multi-megabyte uploads through one 16 KB chunk with resume
-  and bounded retries. Use whenever firmware talks to anything over the network, when an
-  upload or download is designed, when TLS is added, when the board reboots or stalls during a
+  network, fetch JSON, stream multi-megabyte uploads through one 16 KB chunk with resume and
+  bounded retries, and answer simple HTTP requests from a laptop or another device on the same
+  network. Use whenever firmware talks to anything over the network, when an upload or
+  download is designed, when the knob must receive data or expose an endpoint ("send it to the
+  knob", "HTTP server on the device", "another device posts to it"), when TLS is added, when
+  the board reboots or stalls during a
   transfer, when "out of memory", "ESP_ERR_NO_MEM", "Out of buffer", "tcp_write failed" or a
-  task watchdog appears while networking, and for exercise rungs 7–10. Built from a production
+  task watchdog appears while networking, and for exercise rungs 7–11. Built from a production
   recorder on this board that streams multi-megabyte audio to the cloud.
 ---
 
@@ -163,7 +166,58 @@ transfer); the server's view of received parts is the truth.
   while the port task held the lock during an upload. If you see `task_wdt`, look for a lock
   held across I/O.
 
-## 8. Exercise ladder (network half)
+## 8. Serving simple requests (what `net_serve.c` does)
+
+The template ships a small server on `esp_http_server` for when the knob is the one being
+called; copy its shape for new routes, do not write one from memory. §1 still holds, turned
+around: **receive through one chunk, never a body-sized buffer.** What it is good for:
+
+- **A data meter:** something POSTs a number, the knob shows it.
+- **A webhook endpoint** in a home automation setup (a doorbell, a timer, an alarm).
+- **A coding agent reporting progress** on its work to the display on your desk.
+- **Devices talking to each other** by pushing when something happens, with no polling.
+- **Others reading from the knob:** sensor or application state through `GET /status`.
+
+```c
+// net_serve.h — start once after net_init(); listens on port 80 and survives reconnects
+typedef void (*net_serve_sink_t)(const uint8_t *data, size_t len, size_t offset, size_t total);
+bool net_serve_start(net_serve_sink_t sink, size_t max_body);
+//   GET  /status -> {"rssi":-60,"free_internal":180000,"uptime_s":42}
+//   POST /data   -> body handed to the sink piece by piece, then "ok"
+```
+
+```bash
+curl http://<knob-ip>/status                    # the IP is in the boot log: "net: got IP"
+curl -H 'X-Token: <token>' --data-binary @file http://<knob-ip>/data
+```
+
+Measured on a K518 over plain HTTP (not alongside TLS or a running upload, so log your own
+heap, §2): the server costs about 8 KB of internal RAM, a 250 KB POST takes 1–2 s and moves
+the internal low-water mark by under 10 KB, the server task keeps about 1.3 KB of its 4 KB
+stack free.
+
+- **One task serves every request in turn.** A handler that blocks, blocks the server. A
+  sender that declared 50 KB, sent 10 bytes and went quiet held every other request for about
+  10 s (twice `recv_wait_timeout`), and 19 s when the handler retried on timeout: never retry
+  a receive. Take the bytes, hand them on, answer, return.
+- **The sink decides what the bytes are:** a number to show, a JSON command, a file kept in
+  one reused PSRAM buffer. It runs on the server task, so no LVGL there: publish through
+  atomics or a queue and let the LVGL task pick it up, as `app_serve.c` does.
+- **Pieces are whatever the network delivers,** typically 2–3 KB (250 KB came as about 100
+  calls). Work from `offset` and `len`; the last piece has `offset + len == total`. A body cut
+  off mid-way just stops; the next one starts at offset 0.
+- **Refuse before reading, and always answer.** `serve_gate.c` (pure, host-tested) decides
+  401 / 400 / 413 from the token and the declared length before a single body byte is read.
+  Without the size ceiling anyone on the network can make the knob swallow gigabytes.
+- **Plain HTTP, for a network you trust.** Set `KNOB_SERVE_TOKEN` in `wifi_secrets.h` to
+  require an `X-Token` header; empty leaves `/data` open. Serving TLS from the knob puts a
+  handshake per connection on the internal heap: measure before choosing it.
+- **A stable name** instead of an IP: add the managed component `espressif/mdns`, then
+  `mdns_init(); mdns_hostname_set("knob");` gives `http://knob.local/` (tried on the board;
+  not in the template, to keep its dependencies small).
+- **A new route** is a handler plus `httpd_register_uri_handler()`; keep locals small (4 KB stack).
+
+## 9. Exercise ladder (network half)
 
 7. **Join Wi-Fi and show RSSI.** The template already shows `wi-fi N dBm` from its 200 ms
    tick. Move it to its own 1 s `lv_timer`, append "weak" below −75 dBm, and log the internal
@@ -178,7 +232,12 @@ transfer); the server's view of received parts is the truth.
     loop rejoins, the retry asks the receiver how much it has and resumes from that offset,
     the arc continues. No reboot, no leak (heap after == heap before).
 
-## 9. Checklist for any networking change
+11. **Let another device call the knob.** `curl` a small JSON body to `POST /data`; change the
+    sink in `app_serve.c` to keep it (≤ 1 KB, static buffer), parse one number with `cJSON`
+    on the LVGL tick and show it. Then stall a sender (`nc`, declare more than you send) and
+    watch `/status` wait.
+
+## 10. Checklist for any networking change
 
 - [ ] Peak internal heap independent of payload size (one shared chunk).
 - [ ] `min-free-internal` logged and above the floor you set.
@@ -187,3 +246,5 @@ transfer); the server's view of received parts is the truth.
 - [ ] Nothing network-related runs on the LVGL task.
 - [ ] Secrets out of git; password never logged.
 - [ ] Resume tested by actually breaking the link once.
+- [ ] If the knob serves requests: body size capped, every request answered, handlers do not
+      block, heap logged with the server running.

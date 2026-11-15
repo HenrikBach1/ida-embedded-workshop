@@ -47,6 +47,12 @@ run_suite test_upload_plan \
   "$ROOT/components/net/upload_plan.c" \
   -I"$ROOT/components/net/include"
 
+# Admission rules of the on-device HTTP server: token, empty body, size ceiling.
+run_suite test_serve_gate \
+  "$HOST/test_serve_gate.c" \
+  "$ROOT/components/net/serve_gate.c" \
+  -I"$ROOT/components/net/include"
+
 echo "── board pin lint ──────────────────────────────────────────"
 bash "$ROOT/scripts/check-board-pins.sh" || fail=1
 echo

@@ -38,7 +38,7 @@ cp components/net/include/wifi_secrets.example.h components/net/include/wifi_sec
 ```
 
 Edit `wifi_secrets.h`: `KNOB_WIFI_SSID`, `KNOB_WIFI_PASS`, `KNOB_RECEIVER_URL`
-(`http://<your-laptop-ip>:8080`). It is gitignored; never commit it.
+(`http://<your-laptop-ip>:8080`), and `KNOB_SERVE_TOKEN` if others share the Wi-Fi. It is gitignored; never commit it.
 
 Layout:
 
@@ -48,7 +48,8 @@ components/ui/      ui.c (panel + touch + LVGL port), ui_panel_init_cmds.c, knob
                     knob_decode.c, backlight.c, fonts/
 components/theme/   theme.c + tokens.h (colour = state)
 components/haptic/  haptic.c (DRV2605L)
-components/net/     net.c (Wi-Fi), net_http.c (GET + streamed PUT), upload_plan.c
+components/net/     net.c (Wi-Fi), net_http.c (GET + streamed PUT), upload_plan.c,
+                    net_serve.c (HTTP server: GET /status, POST /data), serve_gate.c
 components/app/     app.c — the state machine; edit this first
 components/testctl/ dev-only serial test console: inject knob/tap/hold, dump the screen
 main/main.c         init order
@@ -130,6 +131,8 @@ bool net_http_put_stream(const char *url, uint64_t total_len,
                          void (*rewind_cb)(void *ctx),            // called before EVERY attempt
                          size_t (*read_cb)(void *ctx, uint8_t *dst, size_t cap), void *ctx,
                          void (*progress_cb)(uint64_t sent, uint64_t total));
+bool net_serve_start(void (*sink)(const uint8_t *data, size_t len, size_t offset, size_t total),
+                     size_t max_body);      // the knob answers GET /status and POST /data
 // app
 void app_init(void);                         // starts the state machine
 void app_inject_knob(int steps);             // test hooks (testctl): same handlers as hardware

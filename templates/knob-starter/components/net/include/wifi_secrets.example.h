@@ -9,3 +9,8 @@
 // (`python3 templates/receiver/receiver.py --port 8080`), reachable from the same Wi-Fi.
 // Plain http is fine on a LAN; https works too (TLS validated against the mbedTLS cert bundle).
 #define KNOB_RECEIVER_URL   "http://192.168.1.10:8080/upload/knob.bin"
+
+// The knob also answers HTTP itself (net_serve.h): GET /status and POST /data. With a token set
+// here, POST /data requires the header `X-Token: <token>`; "" leaves it open to everyone on the
+// Wi-Fi. Set one whenever the network is not yours alone.
+#define KNOB_SERVE_TOKEN    ""

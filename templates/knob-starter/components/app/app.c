@@ -1,10 +1,12 @@
 // app.c — the state machine and its inputs. Rules this file demonstrates:
 //   • knob and touch callbacks run on the LVGL task → touch widgets directly, no lock needed;
 //   • the upload runs on its own task and NEVER touches LVGL — a 200 ms lv_timer polls its
-//     atomics and updates the arc/status, so there is exactly one owner of the screen.
+//     atomics and updates the arc/status, so there is exactly one owner of the screen;
+//   • data POSTed to the knob arrives on the HTTP server task and is handed over the same way.
 #include "app.h"
 #include "app_screen.h"
 #include "app_upload.h"
+#include "app_serve.h"
 #include "ui.h"
 #include "knob.h"
 #include "haptic.h"
@@ -17,6 +19,10 @@ static const char *TAG = "app";
 
 static app_state_t s_state = APP_IDLE;
 static int         s_counter;
+static uint32_t    s_rx_bytes;       // size of the last body POSTed to the knob
+static int         s_rx_ticks;       // status-line ticks left to show it
+
+#define RX_SHOW_TICKS 15             // 15 x 200 ms = 3 s
 
 static void set_state(app_state_t next)
 {
@@ -85,10 +91,14 @@ void app_state_line(char *buf, size_t cap)
 
 // ---- 200 ms status tick (LVGL task) ----
 
-static void show_wifi_status(void)
+static void show_idle_status(void)
 {
     char line[48];
-    if (net_is_connected()) snprintf(line, sizeof(line), "wi-fi %d dBm", net_rssi());
+    if (s_rx_ticks > 0) {
+        s_rx_ticks--;
+        snprintf(line, sizeof(line), "received %u B", (unsigned)s_rx_bytes);
+    }
+    else if (net_is_connected()) snprintf(line, sizeof(line), "wi-fi %d dBm", net_rssi());
     else                    snprintf(line, sizeof(line), "wi-fi connecting...");
     app_screen_set_status(line);
 }
@@ -98,6 +108,10 @@ static void on_tick(lv_timer_t *t)
     (void)t;
     uint64_t sent, total; bool done, ok;
     app_upload_poll(&sent, &total, &done, &ok);
+    if (app_serve_poll(&s_rx_bytes)) {      // another device POSTed something to us
+        s_rx_ticks = RX_SHOW_TICKS;
+        haptic_click();
+    }
 
     if (s_state == APP_UPLOADING) {
         app_screen_set_progress(sent, total);
@@ -105,7 +119,7 @@ static void on_tick(lv_timer_t *t)
         snprintf(line, sizeof(line), "%u / %u KB", (unsigned)(sent / 1024), (unsigned)(total / 1024));
         app_screen_set_status(line);
     } else {
-        show_wifi_status();
+        show_idle_status();
     }
     if (done) set_state(ok ? APP_DONE : APP_ERROR);
 }
@@ -120,5 +134,6 @@ void app_init(void)
     ui_unlock();
 
     knob_init(on_knob_step);   // takes the lock itself
+    if (!app_serve_start()) ESP_LOGW(TAG, "HTTP server not started");
     ESP_LOGI(TAG, "ready: turn = count, tap = toggle, hold = upload %u KB", APP_UPLOAD_BYTES / 1024);
 }

@@ -1,6 +1,6 @@
 # Exercise ladder
 
-Ten rungs. Each one is small enough to finish with your AI in 10–15 minutes and leaves the
+Ten rungs and one stretch rung. Each one is small enough to finish with your AI in 10–15 minutes and leaves the
 firmware building, flashable and host-tested. Climb in order; rung 6 and rung 10 are where the
 guardrails earn their keep.
 
@@ -11,7 +11,8 @@ components/board/   pins and capabilities — the ONLY place a GPIO number may a
 components/ui/      display + touch + LVGL bring-up, knob poll + pure decoder, backlight
 components/theme/   design tokens and the colour = state policy (no LVGL dependency)
 components/haptic/  DRV2605L click
-components/net/     Wi-Fi join, HTTP GET, streamed HTTP PUT through one 16 KB PSRAM chunk
+components/net/     Wi-Fi join, HTTP GET, streamed HTTP PUT through one 16 KB PSRAM chunk,
+                    a small HTTP server (GET /status, POST /data) for being called
 components/app/     the state machine: knob/touch events in, theme/haptic/net calls out
 main/main.c         boot order: NVS → ui → haptic → net → app
 test/host/          gcc + Unity suites for the pure modules; scripts/test.sh runs them
@@ -20,7 +21,8 @@ scripts/            build.sh (Docker), flash.sh (host esptool --no-stub), test.s
 
 **API you will touch:** `knob_init(cb)`, `haptic_click()`, `theme_state_color(state)`,
 `theme_state_motion_ms(state)`, `net_init()`, `net_is_connected()`, `net_rssi()`,
-`net_http_get(url, buf, cap)`, `net_http_put_stream(url, total_len, rewind_cb, read_cb, ctx, progress_cb)`.
+`net_http_get(url, buf, cap)`, `net_http_put_stream(url, total_len, rewind_cb, read_cb, ctx, progress_cb)`,
+`net_serve_start(sink, max_body)`.
 
 **Receiver for rungs 9–10:** `python3 templates/receiver/receiver.py --port 8080` on your laptop
 (same Wi-Fi as the knob). It prints bytes received, throughput, and which byte ranges it holds.
@@ -131,6 +133,24 @@ Widgets live in `components/app/app_screen.c`, behaviour in `components/app/app.
 - **Trap:** infinite retry loops; reusing a half-written HTTP client; retries that re-send from
   byte 0.
 - **Touches:** `components/net/`, `components/app/app.c`, `test/host/test_upload_plan.c`.
+
+### Rung 11 (stretch) — Let another device call the knob
+- **Goal:** the knob receives a small JSON body over HTTP and shows one number from it. The
+  template already answers `GET /status` and counts the bytes of a `POST /data`.
+- **Done when:** `curl --data '{"value":42}' http://<knob-ip>/data` puts 42 on the screen, a
+  300 KB body gets a 413, and the min-free internal heap in the log is unchanged afterwards.
+- **Ask the AI:** "In `app_serve.c`, keep bodies up to 1 KB in a static buffer in the sink, and
+  on the 200 ms LVGL tick in `app.c` parse `value` with cJSON and show it. No LVGL in the sink."
+- **Trap:** the AI parses or draws inside the sink (it runs on the HTTP server task), allocates
+  a buffer per request, assumes the body arrives in one piece, or writes a new server instead
+  of using `net_serve.c`.
+- **Touches:** `components/app/app_serve.c`, `components/app/app.c`.
+- **Where this leads:** the same two routes cover a lot of ground.
+  - A simple data meter: something POSTs a number, the knob shows it.
+  - A webhook endpoint in a home automation setup.
+  - Your coding agent sending messages about the progress of its work.
+  - Devices that talk to each other by pushing when something happens, without constant polling.
+  - Other devices reading sensor or application state off your knob through `GET /status`.
 
 ---
 
