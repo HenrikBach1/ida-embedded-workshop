@@ -1,8 +1,82 @@
 # Exercise ladder
 
-Ten rungs and one stretch rung. Each one is small enough to finish with your AI in 10–15 minutes and leaves the
-firmware building, flashable and host-tested. Climb in order; rung 6 and rung 10 are where the
-guardrails earn their keep.
+Ten rungs and one stretch rung, drawn as a map, not a staircase. Each rung is small enough to
+finish with your AI in 10–15 minutes and leaves the firmware building, flashable and host-tested.
+Start from what you want the knob to do, and follow the arrows from that goal.
+
+**Treat all of this loosely.** The rungs are inspiration, not a script, and the "Ask the AI"
+lines are examples of a good prompt, not text to copy and paste. Say what you want in your own
+words, skip a rung, bend one, or invent your own. When something will not build, will not flash
+or behaves oddly, tell your AI tool what you see and ask it to help you find out why: getting
+past obstacles and bugs together is the skill this workshop is about. And be creative. If you
+have an idea for what the knob should do, ask the AI how to get there from the starter.
+
+```mermaid
+%%{init: {"theme": "base", "flowchart": {"curve": "basis", "nodeSpacing": 28, "rankSpacing": 46},
+  "themeVariables": {"fontFamily": "ui-sans-serif, system-ui, sans-serif", "fontSize": "15px",
+  "lineColor": "#8a94a6", "edgeLabelBackground": "#ffffff"}}}%%
+flowchart TD
+    START(["Starter flashed<br/>title · counter · tap · ring · click · RSSI"]):::start
+
+    START --> LOOK{{"I want a screen<br/>that is mine"}}:::goal
+    START --> FEEL{{"I want it to answer<br/>my hands"}}:::goal
+    START --> TRUST{{"I want code<br/>I can trust"}}:::goal
+    START --> ONLINE{{"I want it<br/>on the network"}}:::goal
+
+    LOOK --> R1["<b>1</b> Hello screen"]:::ui
+    R1 --> R4["<b>4</b> Colour = state"]:::ui
+
+    FEEL --> R2["<b>2</b> Knob counter"]:::ui
+    FEEL --> R3["<b>3</b> Touch target"]:::ui
+    R2 --> R5["<b>5</b> Haptic cue"]:::ui
+    R3 --> R5
+    R4 -. "a state to feel" .-> R5
+
+    TRUST --> R6["<b>6</b> Host test for<br/>your pure logic"]:::test
+    R2 -. "logic to extract" .-> R6
+
+    ONLINE --> R7["<b>7</b> Join Wi-Fi,<br/>show RSSI"]:::net
+    R7 --> SHOW{{"show a value<br/>from elsewhere"}}:::goal
+    R7 --> SEND{{"send a lot<br/>of data out"}}:::goal
+    R7 --> CALL{{"let other devices<br/>call the knob"}}:::goal
+
+    SHOW --> R8["<b>8</b> GET a JSON value<br/>and render it"]:::net
+    SEND --> R9["<b>9</b> Stream 2 MB with<br/>a progress arc"]:::net
+    R9 --> R10["<b>10</b> Survive a Wi-Fi<br/>drop mid-transfer"]:::net
+    CALL --> R11["<b>11</b> Let another device<br/>call the knob"]:::net
+    R8 -. "same JSON parsing" .-> R11
+
+    R11 --> L1(["data meter"]):::lead
+    R11 --> L2(["webhook for<br/>home automation"]):::lead
+    R11 --> L3(["progress from<br/>your coding agent"]):::lead
+    R11 --> L4(["devices pushing<br/>to each other"]):::lead
+
+    click R1 "#rung-1--hello-screen"
+    click R2 "#rung-2--knob-counter"
+    click R3 "#rung-3--touch-target"
+    click R4 "#rung-4--colour--state"
+    click R5 "#rung-5--haptic-cue"
+    click R6 "#rung-6--host-test-for-your-pure-logic"
+    click R7 "#rung-7--join-wi-fi-show-rssi"
+    click R8 "#rung-8--get-a-json-value-and-render-it"
+    click R9 "#rung-9--stream--2-mb-with-a-progress-arc"
+    click R10 "#rung-10--survive-a-wi-fi-drop-mid-transfer"
+    click R11 "#rung-11-stretch--let-another-device-call-the-knob"
+
+    classDef start fill:#1f2933,stroke:#1f2933,color:#ffffff,stroke-width:2px
+    classDef goal fill:#fff7e0,stroke:#d99a1c,color:#4a3500,stroke-width:2px
+    classDef ui fill:#dff5f1,stroke:#1a9c8a,color:#0b3f38,stroke-width:2px,rx:10,ry:10
+    classDef test fill:#ece8fb,stroke:#6c54c9,color:#2a1d66,stroke-width:2px,rx:10,ry:10
+    classDef net fill:#fde6e2,stroke:#c0392b,color:#5a140d,stroke-width:2px,rx:10,ry:10
+    classDef lead fill:#f1f3f6,stroke:#8a94a6,color:#333b48,stroke-dasharray:4 3
+    linkStyle default stroke:#8a94a6,stroke-width:2px
+```
+
+**How to read it.** Yellow is a goal, teal is a screen-and-hands rung, purple is the testing
+rung, red is a network rung, grey is where rung 11 leads. A solid arrow means "do this first";
+a dashed arrow means "easier if you have done this, not required". The numbers are names, not
+an order: rung 7 is the only gate, since everything on the network needs Wi-Fi first. Rungs 6
+and 10 are where the guardrails earn their keep, so take at least one of them.
 
 **Template layout** (what the scaffold gives you):
 
@@ -174,3 +248,16 @@ Widgets live in `components/app/app_screen.c`, behaviour in `components/app/app.
    AI will mix pin maps. The board header is the only source.
 4. "Just fix the warnings." — Strapping warnings on GPIO45/46 are expected; "fixing" them
    breaks the mic and sometimes the boot.
+
+<script type="module">
+  // The published site does not draw mermaid blocks by itself; this turns the block at the top into the graph.
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+  document.querySelectorAll("div.language-mermaid, pre > code.language-mermaid").forEach((block) => {
+    const graph = document.createElement("div");
+    graph.className = "mermaid";
+    graph.textContent = block.textContent;
+    (block.tagName === "CODE" ? block.parentElement : block).replaceWith(graph);
+  });
+  mermaid.initialize({ startOnLoad: false, securityLevel: "loose" });
+  mermaid.run();
+</script>
