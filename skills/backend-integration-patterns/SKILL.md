@@ -5,16 +5,27 @@ description: >
   user with a short code (RFC 8628 device flow), bearer tokens with refresh, resumable
   multipart upload through presigned URLs, an asynchronous processing pipeline with a
   reconciler, and one wire contract that generates both the server types and the firmware
-  header. Use only when someone asks for a backend, a server, an API, authentication, "where
-  do I send this", "how does the device log in", or how to process uploads after they land.
-  Presented as patterns from a production device, not as the only way.
+  header. Also the small tier before all that: two devices on one Wi-Fi (a camera, a sensor,
+  a second knob) agreeing on one shared header, a shared secret and event ids. Use when
+  someone asks for a backend, a server, an API, authentication, "where do I send this", "how
+  does the device log in", how to process uploads after they land, or when a second device
+  joins the project ("device-to-device", "the camera sends to the knob", "they talk to each
+  other"). Presented as patterns from a production device, not as the only way.
 ---
 
 # Backend integration patterns for a connected device
 
 These patterns come from a production recorder on this board that uploads audio to a cloud
 backend, gets it transcribed and summarised, and shows the result on the device. They are
-vendor-neutral; the last section shows one concrete mapping.
+vendor-neutral; §7 shows one concrete mapping.
+
+Pick the smallest tier that fits, and move up only when its trigger is true:
+
+| Tier | Fits when | Section |
+|---|---|---|
+| Receiver on a laptop | One device needs somewhere to send bytes | §8 |
+| Two devices on one LAN | Your own devices talk to each other; no users, no cloud | §9 |
+| Backend | A person must own a device, traffic leaves the LAN, or data must outlive a power cut | §1–§7 |
 
 ## 1. One contract, generated into both worlds
 
@@ -164,5 +175,39 @@ S3-compatible store, a queue and a scheduler can host the same patterns.
 
 If all that is needed today is "somewhere to send bytes": `templates/receiver/receiver.py`.
 Single file, stdlib only: `PUT /upload/<name>` appends (with `X-Offset` for resume),
-`GET /upload/<name>` returns `{"received": n}`. Graduate to §4 when a second device or a
-real user appears.
+`GET /upload/<name>` returns `{"received": n}`. Move to §9 when a second device appears, to
+§4 when a real user does.
+
+## 9. Two devices on one LAN
+
+A camera that pushes a photo to the knob, a sensor that pushes a reading, two knobs that
+mirror each other. Decide these six things **before the second firmware exists**; they are
+the same decisions as §1–§5, at the size a LAN needs. The knob's side is the template's
+`net_serve` (`networking-under-memory-constraints` §8); the token check ships there, the
+rest is a convention you add in the sink and the sender.
+
+1. **One contract file.** A single `link_contract.h` that both firmwares include: route
+   strings, header names, maximum body size, a contract version. One file in one place
+   (a shared folder or a submodule), never retyped. This is §1 without the generator.
+2. **Who is calling.** A shared secret in a header (`X-Token`, `KNOB_SERVE_TOKEN` in the
+   template) and a sender name (`X-Device: cam-1`). It keeps strangers on the Wi-Fi out; it
+   is plain HTTP, so it does not stop someone who can listen to the network.
+3. **Event identity.** Every message carries `X-Event-Id` (a counter the sender keeps in
+   NVS so it survives a reboot) and a timestamp from SNTP. Without an id the receiver cannot
+   tell a new event from a retry of the last one.
+4. **The answer is the acknowledgement.** The receiver answers 200 only after it has taken
+   the data. The sender retries a bounded number of times on anything else (the bounds in
+   the networking skill §5), with the same event id.
+5. **Duplicates.** A retry after a lost answer delivers the same event twice. The receiver
+   remembers the last event id per sender and answers 200 without acting again. A counter
+   that counts birds twice is this bug.
+6. **Version.** The sender states `X-Contract: 1`; the receiver refuses another number with
+   a 409 and says so on screen. Two devices flashed a week apart will disagree one day.
+
+Push when something happens, do not poll: the sender POSTs the event, and anyone who wants
+current state reads `GET /status`. To prove it end to end, test each side alone first (`curl`
+against the receiver, `receiver.py` in place of it for the sender), then together, logging
+the event id on both sides and comparing the two logs.
+
+Move up to §2–§5 when a person must claim a device, when traffic leaves the LAN, or when an
+event must not be lost while the receiver is switched off.

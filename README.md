@@ -14,7 +14,7 @@ from a production firmware on the same board. Nothing in it depends on one AI ve
 | `firmware-code-organisation` | Keeping files small, components cohesive, pure logic host-tested |
 | `scaffold-knob-firmware` | Starting a new project from the template, first flash, exercise rungs 1–6 |
 | `networking-under-memory-constraints` | Wi-Fi, HTTP, streaming uploads and serving simple HTTP requests without exhausting internal RAM, rungs 7–11 |
-| `backend-integration-patterns` | You need a backend: pairing, tokens, resumable upload, contract-first API |
+| `backend-integration-patterns` | A second device joins (shared contract, secret, event ids on a LAN), or you need a backend: pairing, tokens, resumable upload, contract-first API |
 | `round-display-ux-navigation` | Adding screens, lists, details, back, idle timeout; swipe + knob navigation on a round panel |
 | `verify-on-device` | Proving a change on the real board: serial test console (inject knob/tap/hold, read state), pixel-exact LVGL snapshot over USB, webcam check |
 

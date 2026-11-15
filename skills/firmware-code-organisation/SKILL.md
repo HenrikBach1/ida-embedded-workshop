@@ -187,4 +187,6 @@ Run this before saying a firmware change is finished.
 - [ ] No blocking call inside an LVGL callback; no LVGL call outside the lock.
 - [ ] Heap logged at the phases the change affects; internal minimum-free noted in the notes.
 - [ ] Secrets (`wifi_secrets.h`) untracked; `wifi_secrets.example.h` updated if keys changed.
+- [ ] `scripts/verify-screens.sh` still describes the app: its `EXPECT` lines match what
+      `app_state_line()` prints now, and it passes on the device.
 - [ ] Flashed and seen working on the device, or stated plainly that it was not.

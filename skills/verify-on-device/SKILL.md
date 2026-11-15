@@ -102,6 +102,10 @@ CROP=1920:1080:0:0 <skill-dir>/scripts/capture.sh full.jpg # find the panel afte
    label, clipped text, black panel.
 5. Extend `verify-screens.sh` whenever you add a state. A state that is not in the walk is
    not verified.
+6. Change `verify-screens.sh` in the same commit as the model. Its `EXPECT` lines are the
+   output of `app_state_line()`; rename a field there (`counter` becomes `birds`) and every
+   step fails until the script follows. A walk nobody runs any more is how a project ends up
+   with passing host tests and no proof of what is on the panel.
 
 Six iterations is a sensible budget for a design loop; if a screen still is not right, the
 plan is wrong, not the pixels.

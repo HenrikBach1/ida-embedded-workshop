@@ -30,22 +30,18 @@ board while uploading recordings over HTTPS.
 
 ## 2. Make room: sdkconfig and placement
 
-These lines in `sdkconfig.defaults` are the difference between an upload that works and one
-that stalls at 8 KB free:
+What lives in PSRAM and what must stay internal is decided in `embedded-constraints` §1,
+and the template's `sdkconfig.defaults` already applies it (PSRAM on, LVGL's 128 KB pool
+moved out of internal SRAM). Do not repeat those choices here; check they are still in place.
+The network-specific lines are the TCP windows:
 
 ```
-CONFIG_SPIRAM=y
-CONFIG_SPIRAM_MODE_OCT=y
-CONFIG_SPIRAM_SPEED_80M=y
-CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY=y   # big static arrays may live in PSRAM
-CONFIG_LV_MEM_SIZE_KILOBYTES=128                 # LVGL pool, placed in PSRAM via LV_ATTRIBUTE_LARGE_RAM_ARRAY
 CONFIG_LWIP_TCP_SND_BUF_DEFAULT=16384            # default 5760 B = more fill/drain cycles
 CONFIG_LWIP_TCP_WND_DEFAULT=16384
 ```
 
-The observed failure: with LVGL's 128 KB pool in internal SRAM, an HTTPS PUT logged
-**free-internal 8 KB, largest block 1.5 KB** and lwIP could not allocate its send buffer.
-Moving the pool to PSRAM fixed it, and only then was a 16 KB TCP window allocatable.
+They are only allocatable once the pool is out of the way: with it in internal SRAM an HTTPS
+PUT logged **free-internal 8 KB, largest block 1.5 KB** and lwIP could not get a send buffer.
 
 Log the posture at named phases and keep the numbers in your notes:
 
@@ -157,14 +153,13 @@ transfer); the server's view of received parts is the truth.
 
 ## 7. Task hygiene
 
+The LVGL-task rules (nothing blocking in a callback or timer, no I/O while holding the lock,
+what a `task_wdt` trip means) are in `embedded-constraints` §3. What networking adds:
+
 - One network task, 8 KB stack with TLS, priority below the LVGL port task. Jobs arrive on a
   queue; results go back through a callback registered by `app` (`net_set_result_cb`) and are
   applied to the UI under `ui_lock()`.
-- Never network inside an LVGL event handler or timer.
 - Progress is a number, not a string: pass `sent/total`, let the UI task format it.
-- The reference firmware tripped the task watchdog when the app task spun in `lv_malloc`
-  while the port task held the lock during an upload. If you see `task_wdt`, look for a lock
-  held across I/O.
 
 ## 8. Serving simple requests (what `net_serve.c` does)
 
@@ -215,7 +210,10 @@ stack free.
 - **A stable name** instead of an IP: add the managed component `espressif/mdns`, then
   `mdns_init(); mdns_hostname_set("knob");` gives `http://knob.local/` (tried on the board;
   not in the template, to keep its dependencies small).
-- **A new route** is a handler plus `httpd_register_uri_handler()`; keep locals small (4 KB stack).
+- **A new route** is a handler plus one `httpd_register_uri_handler()`; raise
+  `cfg.max_uri_handlers` beyond 8 routes and keep handler locals small (4 KB stack).
+- **A second device of your own** on the other end: agree the routes, the token and an event
+  id first, see `backend-integration-patterns` §9.
 
 ## 9. Exercise ladder (network half)
 
