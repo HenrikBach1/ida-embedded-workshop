@@ -100,7 +100,8 @@ Widgets live in `components/app/app_screen.c`, behaviour in `components/app/app.
 - **Ask the AI:** "Move the RSSI line in `app.c` to its own 1 s `lv_timer`, append 'weak' below
   −75 dBm, and log the internal heap once after the first IP."
 - **Trap:** the AI commits `wifi_secrets.h` (it is gitignored, keep it so) or polls Wi-Fi from
-  the LVGL task with a blocking wait.
+  the LVGL task with a blocking wait. The knob is 2.4 GHz only: if your router names its 2.4
+  and 5 GHz networks separately, give it the 2.4 GHz one.
 - **Touches:** `components/net/include/wifi_secrets.h`, `components/app/app.c`.
 
 ### Rung 8 — GET a JSON value and render it

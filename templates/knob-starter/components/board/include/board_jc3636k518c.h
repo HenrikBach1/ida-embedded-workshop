@@ -27,8 +27,9 @@
 // sidecar and is not needed: direction decodes from EC1 alone (verified on-device 2026-10-13). ---
 #define BOARD_KNOB_A            8
 #define BOARD_KNOB_B            7
-// The one sign-flip point for rotation direction: flip it here if CW turns out to step DOWN.
-#define BOARD_KNOB_DIRECTION    (-1)
+// The one sign-flip point for rotation direction: +1 = a clockwise detent counts UP. It was -1
+// until 2026-11-15, when two units counted DOWN on a clockwise turn. Flip it here, nowhere else.
+#define BOARD_KNOB_DIRECTION    (+1)
 
 // --- microSD, SDMMC 4-bit (10k pull-ups on CMD/D0-D3 on-board) ---
 #define BOARD_SD_CLK            4

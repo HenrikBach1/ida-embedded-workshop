@@ -1,6 +1,6 @@
 # Install card — plugin + toolchain
 
-Repo: `https://github.com/dalager/ida-embedded-workshop`. The plugin is seven plain-Markdown skills plus a
+Repo: `https://github.com/dalager/ida-embedded-workshop`. The plugin is eight plain-Markdown skills plus a
 starter template; it needs nothing Claude-specific and works in any Agent-Skills-aware tool.
 
 ## 1. Install the plugin in your AI tool
@@ -28,7 +28,7 @@ Start a new session. `codex plugin marketplace upgrade ida-embedded-workshop` fe
 ```bash
 copilot plugin marketplace add dalager/ida-embedded-workshop
 copilot plugin install ida-embedded-workshop@ida-embedded-workshop
-copilot skill list        # should list the six ida-embedded-workshop skills
+copilot skill list        # should list the eight ida-embedded-workshop skills
 ```
 
 **Cursor**
@@ -107,8 +107,11 @@ host terminal. If the port is missing, `system_profiler SPUSBDataType | grep -A3
 **Windows**
 
 - Use Docker Desktop (WSL 2 backend) for the build; flash from a PowerShell on the host.
-- Windows 10 usually needs the Espressif USB JTAG/serial driver: install it with Zadig
-  (select the `USB JTAG/serial debug unit` interface → WinUSB) or the Espressif driver package.
+- Windows 11 detects the USB JTAG/serial unit by itself (reported by a participant; no driver
+  install). Windows 10 usually needs the Espressif driver: install it with Zadig (select the
+  `USB JTAG/serial debug unit` interface → WinUSB) or the Espressif driver package.
+- Install esptool with `python3 -m pip install esptool` (or `python -m pip ...`, whichever
+  name your Python answers to), and run it as `python3 -m esptool` if `esptool` is not found.
 - Port is `COMx`; pass `--port COM5` to esptool.
 - Never try to pass the USB device into the container. Build in Docker, flash on the host.
 

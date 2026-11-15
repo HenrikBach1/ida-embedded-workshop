@@ -37,7 +37,7 @@ cd ~/my-knob
 cp components/net/include/wifi_secrets.example.h components/net/include/wifi_secrets.h
 ```
 
-Edit `wifi_secrets.h`: `KNOB_WIFI_SSID`, `KNOB_WIFI_PASS`, `KNOB_RECEIVER_URL`
+Edit `wifi_secrets.h`: `KNOB_WIFI_SSID` (a 2.4 GHz network), `KNOB_WIFI_PASS`, `KNOB_RECEIVER_URL`
 (`http://<your-laptop-ip>:8080`), and `KNOB_SERVE_TOKEN` if others share the Wi-Fi. It is gitignored; never commit it.
 
 Layout:

@@ -64,6 +64,8 @@ the field even if it passes on the bench.
 - Reconnect loop in the event handler: `WIFI_EVENT_STA_DISCONNECTED` → `esp_wifi_connect()`
   again, forever. An event-group bit set on `IP_EVENT_STA_GOT_IP` is what `net_is_connected()`
   reads; `net_wait_connected(timeout_ms)` blocks a worker on it.
+- The radio is 2.4 GHz only. Stuck on "connecting" with correct credentials usually means the
+  SSID is a 5 GHz-only name.
 - Start SNTP once on the first IP if you need real timestamps.
 - `net_rssi()` reads `esp_wifi_sta_get_ap_info()`; 0 means not associated.
 - Never call `net_wifi_join()` or a scan from the LVGL task; a blocking scan leaves the channel
