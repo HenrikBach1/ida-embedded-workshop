@@ -51,7 +51,28 @@ pi install https://github.com/dalager/ida-embedded-workshop
 
 Then `/reload` in an open session; `/skill:scaffold-knob-firmware` invokes a skill explicitly.
 
-**Universal fallback (any tool, including OpenCode, Kiro, Cline)**
+**OpenCode** (2.x, checked on 2.3.0)
+
+```bash
+git clone https://github.com/dalager/ida-embedded-workshop ~/ida-embedded-workshop
+```
+
+Then add the skills folder to `~/.config/opencode/opencode.json` (`opencode debug paths` shows
+where your config lives):
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "skills": ["~/ida-embedded-workshop/skills"]
+}
+```
+
+Run `opencode reload` or start a new session. `@scaffold-knob-firmware` in a prompt loads a skill
+by hand; `git -C ~/ida-embedded-workshop pull` fetches updates. OpenCode has no install command
+for skills (`opencode plugin add` is for code plugins), and it also reads `~/.agents/skills` and
+`~/.claude/skills`, so the fallback below works too.
+
+**Universal fallback (any tool, including Kiro, Cline)**
 
 ```bash
 git clone https://github.com/dalager/ida-embedded-workshop ~/ida-embedded-workshop
