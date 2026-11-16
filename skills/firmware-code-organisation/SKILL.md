@@ -36,6 +36,21 @@ includes LVGL. `board` includes nothing.
 Each component has `CMakeLists.txt`, `include/<name>.h` (public), and `.c` files. Private
 headers stay next to the `.c` (`foo_priv.h`), not in `include/`.
 
+**Init order is explicit and lives in one place.** `app_main()` is the only boot sequence, with
+the dependency stated beside each call: NVS, then storage, then the display, then network,
+then the app. Two bugs in the reference firmware were "read before ready": a stored PIN read
+from an NVS handle that was not open yet (the device never locked), and a recordings list
+built before the SD card was mounted (empty on every boot).
+
+- A module that is used before its `*_init()` must fail loudly (`assert(s_ready)` or an
+  `ESP_LOGE` and an error return), never hand back a default that looks like real data.
+- When a new init depends on another, move it in `app_main()` and say why in the comment.
+- **Assume there is no clock and no counter that survives a reboot** until you have built one.
+  The board has no RTC; time exists only after SNTP. A constant recording ID made every upload
+  overwrite the last, and a counter that restarted at boot reused `rec_001`. Identifiers come
+  from something durable: a counter kept in NVS, or device id + card generation + file name
+  (`backend-integration-patterns` §4 and §9).
+
 ## 2. Files under 300 lines
 
 A 300-line ceiling keeps a file readable in one sitting and small enough for an assistant to
@@ -186,6 +201,14 @@ Run this before saying a firmware change is finished.
 - [ ] No new `#include` crosses the dependency direction in §1.
 - [ ] No blocking call inside an LVGL callback; no LVGL call outside the lock.
 - [ ] Heap logged at the phases the change affects; internal minimum-free noted in the notes.
+- [ ] Stack low-water mark logged for every task whose work changed; no large local arrays.
+- [ ] No silent truncation, cap or skip: bounded writes and parses are checked and a miss is
+      logged with both sizes (`embedded-constraints` §6).
+- [ ] Run with the worst-case input (longest recording, largest response, longest URL), not
+      only the small one used while developing.
+- [ ] Nothing reads a module before its init; no identifier depends on a clock or a counter
+      that resets at boot.
+- [ ] Reviewed by someone, or a fresh assistant session, asked to find the bug.
 - [ ] Secrets (`wifi_secrets.h`) untracked; `wifi_secrets.example.h` updated if keys changed.
 - [ ] `scripts/verify-screens.sh` still describes the app: its `EXPECT` lines match what
       `app_state_line()` prints now, and it passes on the device.

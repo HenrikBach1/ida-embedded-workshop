@@ -47,6 +47,13 @@ web app, a JSON Schema for anyone else, and a C header with `#define CONTRACT_PA
 (8*1024*1024)` and the route strings. The firmware is a conformist: it includes the generated
 header and never hand-copies a path. Run the generator before every firmware build.
 
+**The contract also owns the size limits the firmware's buffers depend on:** the longest URL
+the backend may mint, the largest JSON response per route, the longest token. The generated
+header carries them (`CONTRACT_MAX_URL_LEN`), the firmware sizes its buffers from them, and a
+backend test asserts that real responses fit, using production-length values (a presigned
+storage URL is 800–950 characters). Without that, the first production run of the reference
+system overflowed three firmware buffers that every dev-environment test had passed.
+
 ## 2. Pairing: device flow with a short code (RFC 8628, adapted)
 
 A device with no keyboard proves it belongs to a person like this:

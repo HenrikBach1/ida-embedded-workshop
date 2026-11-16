@@ -34,8 +34,9 @@ bool net_wifi_join(const char *ssid, const char *pass);
 
 // ------------------------------------------------------------------- HTTP --
 
-// GET `url` into buf[cap] (NUL-terminated; bytes past cap-1 are dropped). Returns the HTTP status,
-// or -1 on transport failure. 8 s timeout. Good for small JSON; never for a file.
+// GET `url` into buf[cap] (NUL-terminated). Returns the HTTP status, or -1 on transport failure
+// AND when the body did not fit: the overflow is logged with both sizes and buf holds only the
+// part that fitted, so do not parse it. 8 s timeout. Good for small JSON; never for a file.
 int net_http_get(const char *url, char *buf, size_t cap);
 
 // Supplies the next bytes of the body: copy up to `cap` bytes into dst, return how many (0 = end).

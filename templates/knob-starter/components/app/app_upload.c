@@ -1,6 +1,8 @@
 // app_upload.c — generates APP_UPLOAD_BYTES of xorshift noise on the fly (nothing is ever buffered
-// whole) and pushes it through net_http_put_stream() from a dedicated task with a 6 KB stack —
-// enough for esp_http_client + TLS; the LVGL task never blocks on the network.
+// whole) and pushes it through net_http_put_stream() from a dedicated task, so the LVGL task never
+// blocks on the network. The 6 KB stack carries esp_http_client and nothing else; the task logs
+// its stack low-water mark when it ends. Give it more work (cJSON, LVGL calls, a local buffer)
+// and that number is what tells you the new size: the same workload overflowed 8 KB elsewhere.
 #include "app_upload.h"
 #include "net.h"
 #include "wifi_secrets.h"
@@ -10,6 +12,8 @@
 #include <stdatomic.h>
 
 static const char *TAG = "upload";
+
+#define UPLOAD_STACK_BYTES 6144
 
 typedef struct { uint32_t rng; uint64_t produced; } source_t;
 
@@ -66,6 +70,8 @@ static void upload_task(void *arg)
         source_t src;
         net_http_put_stream(KNOB_RECEIVER_URL, APP_UPLOAD_BYTES, source_rewind, source_read, &src, on_progress);
     }
+    ESP_LOGI(TAG, "stack: %u B never used of %u", (unsigned)uxTaskGetStackHighWaterMark(NULL),
+             (unsigned)UPLOAD_STACK_BYTES);
     atomic_store(&s_running, false);
     vTaskDelete(NULL);
 }
@@ -77,7 +83,7 @@ bool app_upload_start(void)
     atomic_store(&s_sent, 0);
     atomic_store(&s_done, false);
     net_set_result_cb(on_result);
-    if (xTaskCreate(upload_task, "upload", 6144, NULL, 5, NULL) != pdPASS) {
+    if (xTaskCreate(upload_task, "upload", UPLOAD_STACK_BYTES, NULL, 5, NULL) != pdPASS) {
         atomic_store(&s_running, false);
         return false;
     }

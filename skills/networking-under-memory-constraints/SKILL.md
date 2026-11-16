@@ -116,6 +116,8 @@ Points that bit the reference firmware:
   a source that has already run dry turns the second attempt into "source ran dry".
 - A half-written stream cannot be resumed on the same client. Each retry uses a **fresh client
   and a fresh source position**.
+- Size URL and header buffers for production, not for the bench: a presigned storage URL is
+  800–950 characters where a dev URL is 40. Test with one that long.
 - `esp_http_client_open()` includes TCP connect and the full TLS handshake; time it. On this
   board a TLS handshake takes on the order of a second and tens of KB of internal heap while it runs; measure it.
 
@@ -158,7 +160,10 @@ transfer); the server's view of received parts is the truth.
 The LVGL-task rules (nothing blocking in a callback or timer, no I/O while holding the lock,
 what a `task_wdt` trip means) are in `embedded-constraints` §3. What networking adds:
 
-- One network task, 8 KB stack with TLS, priority below the LVGL port task. Jobs arrive on a
+- One network task, priority below the LVGL port task. Stack: 6 KB carries `esp_http_client`
+  alone (the template's upload task logs its low-water mark when it ends); the reference
+  firmware needed 16 KB once the same task also parsed JSON and made LVGL calls, after
+  overflowing 8 KB twice. Measure, `embedded-constraints` §3. Jobs arrive on a
   queue; results go back through a callback registered by `app` (`net_set_result_cb`) and are
   applied to the UI under `ui_lock()`.
 - Progress is a number, not a string: pass `sent/total`, let the UI task format it.
@@ -223,7 +228,10 @@ stack free.
    tick. Move it to its own 1 s `lv_timer`, append "weak" below −75 dBm, and log the internal
    heap once after the first IP (`#include "esp_heap_caps.h"`).
 8. **GET a JSON value and render it.** `net_http_get(url, buf, cap)` from the network task,
-   `cJSON` parse, push one number to the UI via callback. Keep `buf` ≤ 4 KB and in PSRAM.
+   `cJSON` parse, push one number to the UI via callback. Keep `buf` ≤ 4 KB and in PSRAM
+   (never a local array: that is the task's whole stack). `net_http_get` returns -1 and logs
+   both sizes when the body does not fit; show that failure on screen, and treat a NULL from
+   `cJSON_Parse` the same way. Try it once with a URL whose answer is larger than `buf`.
 9. **Stream ≥ 2 MB with a progress arc.** Start `receiver.py` on the laptop; generate the
    payload in `read_cb` (a counter pattern, no file needed); `net_http_put_stream()` with a
    progress callback that updates an `lv_arc`. Log heap before, during and after; note the
@@ -246,5 +254,10 @@ stack free.
 - [ ] Nothing network-related runs on the LVGL task.
 - [ ] Secrets out of git; password never logged.
 - [ ] Resume tested by actually breaking the link once.
+- [ ] Tested with the worst case, not the bench case: the largest payload, the longest URL,
+      a response bigger than its buffer.
+- [ ] Nothing is truncated or skipped silently: every bounded read, write and parse is
+      checked, and a miss logs both sizes (`embedded-constraints` §6).
+- [ ] Stack low-water mark logged for the network task after its biggest job.
 - [ ] If the knob serves requests: body size capped, every request answered, handlers do not
       block, heap logged with the server running.

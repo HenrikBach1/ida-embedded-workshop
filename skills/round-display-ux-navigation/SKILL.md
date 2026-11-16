@@ -205,6 +205,17 @@ right-swipe on the first page be "back".
   animation on the screen.
 - **Two typefaces, strict roles.** A humanist sans for labels; a mono for machine data
   (timestamps, sizes, codes). A faint, letter-spaced title at the top of each surface.
+- **A font holds only the glyphs it was generated with.** `scripts/gen-fonts.sh` builds
+  `font_muli_28` with ASCII plus 0x00C0–0x00FF (æøå and accents). Anything else renders as an
+  empty box: `·` (U+00B7), `…` (U+2026), `→` (U+2192), `°` (U+00B0), typographic quotes. Before
+  putting a new character in a UI string, add it to `--range` (or `--symbols "·…→"`) and
+  regenerate; if the string is fixed, write `...` and `->` instead. `LV_SYMBOL_*` icons exist
+  only in LVGL's built-in Montserrat fonts: leave the default font on a label that shows one
+  (as the back chevron in §3 does) and never set a generated font on it. Check every screen in
+  a snapshot for boxes; the reference firmware needed two passes to clear them.
+- **A font is taller than its name.** `font_muli_28` has a 34 px line box. Size rows and line
+  spacing from `lv_font_get_line_height(font)`, not from the number in the name, or rows
+  overlap.
 - **Flat tones.** RGB565 bands on gradients; use flat panel colours and one highlight arc.
 - **Never silent.** A list with zero items shows the designed empty state with a route home,
   never a blank screen.

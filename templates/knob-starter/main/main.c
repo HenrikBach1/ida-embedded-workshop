@@ -26,8 +26,9 @@ static void nvs_init(void)
 
 static void log_heap(const char *phase)
 {
-    ESP_LOGI(TAG, "heap[%s]: internal free=%u, psram free=%u", phase,
+    ESP_LOGI(TAG, "heap[%s]: internal free=%u min=%u, psram free=%u", phase,
              (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
+             (unsigned)heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL),
              (unsigned)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
 }
 

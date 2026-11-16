@@ -34,9 +34,11 @@ static void log_internal_heap(const char *phase)
 
 // ------------------------------------------------------------------- GET --
 
-typedef struct { char *buf; size_t cap; size_t len; } body_ctx_t;
+typedef struct { char *buf; size_t cap; size_t len; size_t dropped; } body_ctx_t;
 
-// Event handler: append body bytes while they fit; silently drop the rest (the caller sized buf).
+// Event handler: append body bytes while they fit and COUNT the ones that do not. A body cut to
+// fit still looks like an answer (a 200 and a JSON parse error with no log), so net_http_get()
+// turns a non-zero count into a failure.
 static esp_err_t get_evt(esp_http_client_event_t *e)
 {
     body_ctx_t *c = (body_ctx_t *)e->user_data;
@@ -45,6 +47,7 @@ static esp_err_t get_evt(esp_http_client_event_t *e)
     size_t n = (size_t)e->data_len < room ? (size_t)e->data_len : room;
     memcpy(c->buf + c->len, e->data, n);
     c->len += n;
+    c->dropped += (size_t)e->data_len - n;
     c->buf[c->len] = '\0';
     return ESP_OK;
 }
@@ -52,7 +55,7 @@ static esp_err_t get_evt(esp_http_client_event_t *e)
 int net_http_get(const char *url, char *buf, size_t cap)
 {
     if (!buf || cap == 0) return -1;
-    body_ctx_t body = { .buf = buf, .cap = cap, .len = 0 };
+    body_ctx_t body = { .buf = buf, .cap = cap };
     buf[0] = '\0';
     esp_http_client_config_t cfg = {
         .url = url, .method = HTTP_METHOD_GET, .timeout_ms = GET_TIMEOUT_MS,
@@ -64,6 +67,11 @@ int net_http_get(const char *url, char *buf, size_t cap)
     int status = -1;
     if (esp_http_client_perform(cli) == ESP_OK) status = esp_http_client_get_status_code(cli);
     esp_http_client_cleanup(cli);
+    if (body.dropped) {   // didn't fit = failed, never "a shorter answer"
+        ESP_LOGE(TAG, "GET body truncated: %u B did not fit in a %u B buffer (status %d)",
+                 (unsigned)body.dropped, (unsigned)cap, status);
+        return -1;
+    }
     return status;
 }
 

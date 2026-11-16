@@ -102,4 +102,6 @@ plan is wrong, not the pixels.
 | Snapshot shows a half-drawn arc | Snapped mid-animation; raise `KNOB_SETTLE` |
 | Walk passes once, fails on rerun | It assumes boot state; start with `reset` |
 | A sensor "never responds" (mic, ADC, touch) | Check the measurement before the part. Prove the test can see the effect: fire a stimulus the board controls (the haptic motor is one for the mic) and look at raw samples, not a derived level. See `jc3636k518-device/references/microphone.md` |
+| The device reboots, or `ping` stops answering | Read the serial output before changing code: capture the panic and decode the backtrace (`embedded-constraints` §5). A crash in a different place each boot points at memory (a stack, the heap, the LVGL pool), not at the line it stopped on |
+| Text shows as empty boxes | The font has no glyph for that character; see `round-display-ux-navigation` §5 |
 | Snapshot fine, panel black | Rendering never reached the panel: font, flush, backlight. Trust the person looking at it |
