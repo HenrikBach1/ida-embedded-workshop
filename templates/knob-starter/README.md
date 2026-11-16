@@ -28,7 +28,7 @@ design/             tokens.json / tokens.h, principles.md, fonts + OFL licences
 
 ```bash
 cp components/net/include/wifi_secrets.example.h components/net/include/wifi_secrets.h  # edit it
-scripts/build.sh                 # docker espressif/idf:release-v5.3 → build/knob_starter.bin
+scripts/build.sh                 # docker espressif/idf:release-v6.1 → build/knob_starter.bin
 scripts/flash.sh                 # host esptool --no-stub over /dev/ttyACM0 (full image)
 scripts/flash.sh /dev/ttyACM0 app   # later: app image only
 scripts/test.sh                  # host unit tests + GPIO-literal lint, no IDF needed
@@ -42,9 +42,9 @@ Flash from the host, never from the container (no serial access there). `--no-st
 this board's native USB. On the K518 the USB-C plug orientation picks the chip: `303a:1001`
 (`/dev/ttyACM0`) is the S3 you flash; `1a86:7523` (`/dev/ttyUSB0`) is the Bluetooth sidecar.
 
-Verified green with ESP-IDF 5.3.5, lvgl 9.6.0~1, esp_lvgl_port 2.9.0, esp_lcd_st77916 1.0.1,
+Builds with ESP-IDF 6.1 (`release-v6.1`), lvgl 9.6.0~1, esp_lvgl_port 2.9.0, esp_lcd_st77916 2.0.2,
 esp_lcd_touch_cst816s 1.1.2, esp_lcd_touch 1.2.1 (pinned in `dependencies.lock`).
-Image 1.36 MB of a 9 MB app partition; LVGL's 128 KB pool lives in PSRAM.
+Image 1.48 MB of a 9 MB app partition; LVGL's 128 KB pool lives in PSRAM.
 
 ## API summary
 

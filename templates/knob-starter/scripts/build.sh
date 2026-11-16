@@ -7,7 +7,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ACTION="${1:-build}"; shift || true
-IMAGE="${IDF_IMAGE:-espressif/idf:release-v5.3}"
+IMAGE="${IDF_IMAGE:-espressif/idf:release-v6.1}"
 
 if [ ! -f "$ROOT/components/net/include/wifi_secrets.h" ]; then
   echo "missing components/net/include/wifi_secrets.h — copy wifi_secrets.example.h and edit it" >&2

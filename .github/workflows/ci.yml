@@ -26,7 +26,7 @@ jobs:
         run: cd templates/knob-starter && ./scripts/test.sh
   firmware:
     runs-on: ubuntu-latest
-    container: espressif/idf:release-v5.3
+    container: espressif/idf:release-v6.1
     steps:
       - uses: actions/checkout@v4
       - name: idf.py build (JC3636K518C)

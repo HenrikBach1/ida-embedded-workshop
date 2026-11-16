@@ -12,7 +12,7 @@ description: >
 
 # Scaffold a knob firmware from the starter template
 
-The template at `templates/knob-starter/` is a complete ESP-IDF 5.3 project that has been built,
+The template at `templates/knob-starter/` is a complete ESP-IDF 6.1 project that has been built,
 flashed and run on the board: display, touch, knob, backlight, theme, haptics, Wi-Fi, a streamed
 HTTP upload, and host tests. Copy it, confirm it runs, then change one thing at a time.
 
@@ -20,7 +20,7 @@ HTTP upload, and host tests. Copy it, confirm it runs, then change one thing at 
 
 | Need | Check |
 |---|---|
-| Docker with the IDF image | `docker pull espressif/idf:release-v5.3` |
+| Docker with the IDF image | `docker pull espressif/idf:release-v6.1` |
 | esptool on the host | `pip install esptool` → `esptool version` |
 | gcc for host tests | `gcc --version` |
 | The board on the S3 side of USB | `lsusb \| grep 303a` and `ls /dev/ttyACM0` (flip the plug if you see `1a86:7523`) |
@@ -61,7 +61,7 @@ test/host/          Unity + tests for the pure modules
 ## 2. Build
 
 ```bash
-scripts/build.sh            # runs idf.py build inside espressif/idf:release-v5.3
+scripts/build.sh            # runs idf.py build inside espressif/idf:release-v6.1
 ```
 
 First build downloads managed components (LVGL 9, esp_lcd_st77916, esp_lvgl_port,
@@ -181,7 +181,7 @@ it holds the spine / detail / overlay model and the LVGL shapes for swipe and kn
 
 - Give it the board skill and this one. Ask for one rung, then build and flash yourself.
 - When it proposes a pin, a component or a `CONFIG_` symbol, ask where it came from; the
-  answer must be the board header, `idf_component.yml`, or the IDF docs for 5.3.
+  answer must be the board header, `idf_component.yml`, or the IDF docs for 6.1.
 - When it proposes a new file, ask which component owns it and what its header says.
 - Before accepting a change, run the done checklist in `firmware-code-organisation`, and
   prove it on the board with `verify-on-device` (walk + snapshot), then look at the panel.

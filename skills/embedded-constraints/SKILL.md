@@ -150,7 +150,7 @@ between boots. Reading the panic output named the cause (the LVGL pool was exhau
 2. Decode the addresses against the ELF from the same build (no IDF needed on the host):
 
    ```bash
-   docker run --rm -v "$PWD":/project -w /project espressif/idf:release-v5.3 \
+   docker run --rm -v "$PWD":/project -w /project espressif/idf:release-v6.1 \
      xtensa-esp32s3-elf-addr2line -pfiaC -e build/knob_starter.elf 0x42012345 0x4200abcd
    ```
 
@@ -194,7 +194,7 @@ These are the mistakes generated code made on real projects here. Check for them
 | **Invented pin numbers** | Pins from the K718C, from a Waveshare *W*-series board, from an ESPHome post for a different PCB | Pins exist only as `BOARD_*` macros in one header. Run `scripts/check-board-pins.sh`; it fails the build on any GPIO literal elsewhere. |
 | **Invented components** | `espressif/knob` for the rotary (reads zero: not quadrature), `esp_lcd_gc9a01` for an ST77916 panel, `esp_lcd_touch_cst816d` (the driver is `cst816s`, it covers the D) | Only add managed components that appear in `idf_component.yml`; look the name up on components.espressif.com before adding one. |
 | **LVGL 9.2 idioms on LVGL 9.6** | `lv_obj_add_flag/remove_flag` (deprecated), `CONFIG_LV_MEM_SIZE_KILOBYTES` (ignored; the pool silently falls back to 64 KB) | The lock pins lvgl 9.6.0. Use `lv_obj_set_hidden/clickable/scrollable` and `CONFIG_LV_MEM_SIZE=131072`. Treat every deprecation warning as a bug. |
-| **LVGL 8 API in an LVGL 9 project** | `lv_disp_drv_t`, `lv_obj_set_style_local_*`, `lv_btn_*`, `LV_STATE_PRESSED` as a style selector arg | The template pins LVGL ^9.2. Check the symbol exists in `managed_components/lvgl__lvgl/src/` before using it. |
+| **LVGL 8 API in an LVGL 9 project** | `lv_disp_drv_t`, `lv_obj_set_style_local_*`, `lv_btn_*`, `LV_STATE_PRESSED` as a style selector arg | The template pins LVGL ^9.6. Check the symbol exists in `managed_components/lvgl__lvgl/src/` before using it. |
 | **Guessed panel init sequences** | A plausible ST7789 table, or an extra `esp_lcd_panel_invert_color(true)` on top of the table's `0x21` | Use `ui_panel_init_cmds.c` unchanged. Invert once. |
 | **Non-existent `CONFIG_` symbols** | `CONFIG_LVGL_...` (the real prefix is `CONFIG_LV_`), `CONFIG_SPIRAM_USE_MALLOC` variations from other IDF versions | Grep `sdkconfig` after a build; an unknown symbol in `sdkconfig.defaults` is silently ignored. |
 | **Quadrature assumptions** | PCNT setup, `rotary_encoder` component | The knob is two switches. Use `knob_decode.c`. |
@@ -206,7 +206,7 @@ These are the mistakes generated code made on real projects here. Check for them
 | **Theory before evidence** | Two or three confident "fixes" for a crash nobody has decoded | Backtrace first; §5. |
 | **Level from raw PDM samples** | RMS straight over `i2s_channel_read` output; a "calibrated baseline" of −28 dBFS that never moves; `hp_en` set on the S3 (ESP32-only) | Block DC before any level maths and publish a peak-hold, not the latest block. See `jc3636k518-device/references/microphone.md`. |
 | **"The hardware is defective"** | A long, careful chain of electrical checks ending in an RMA recommendation, where the last link was measured with a metric that could not show the effect | A negative result needs a positive control. Ask what the reading would look like if the part worked, then produce a stimulus and look at raw data. |
-| **Wrong IDF version idioms** | Legacy `driver/i2c.h` instead of `driver/i2c_master.h`; `esp_netif_sntp` missing on old IDF | The template is IDF 5.3; use the new I2C master driver and LEDC APIs as written there. |
+| **Wrong IDF version idioms** | Legacy `driver/i2c.h` instead of `driver/i2c_master.h`; `esp_netif_sntp` missing on old IDF | The template is IDF 6.1; use the new I2C master driver and LEDC APIs as written there. |
 
 ### Verification routine (run before trusting generated code)
 

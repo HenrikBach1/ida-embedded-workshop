@@ -1,5 +1,5 @@
 # ESP-IDF project for the knob-starter firmware (ESP32-S3 round knob display).
-# Build: scripts/build.sh (Docker espressif/idf:release-v5.3). Flash: scripts/flash.sh (host esptool).
+# Build: scripts/build.sh (Docker espressif/idf:release-v6.1). Flash: scripts/flash.sh (host esptool).
 cmake_minimum_required(VERSION 3.16)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 

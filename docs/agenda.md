@@ -9,7 +9,7 @@ endpoint without running out of RAM.
 
 | Item | Why |
 |---|---|
-| Laptop with **Docker** running (`docker pull espressif/idf:release-v5.3`, ~4.5 GB) | Builds run in the ESP-IDF container |
+| Laptop with **Docker** running (`docker pull espressif/idf:release-v6.1`, ~4.2 GB) | Builds run in the ESP-IDF container |
 | **git** | Clone the plugin repo and the starter template |
 | **Python 3** with `pip install esptool` | Flashing runs on the host, never in the container |
 | **An AI coding tool** you already use (Claude Code, Codex, Copilot CLI, Cursor, Droid, Pi, OpenCode, Kiro …) | "Bring your own AI" |
@@ -17,8 +17,8 @@ endpoint without running out of RAM.
 | Linux: your user in the `dialout` group (or a udev rule) | Serial port access |
 | Windows: Espressif USB JTAG/serial driver (or Zadig) | See the install card |
 
-Check before the day: `docker run --rm espressif/idf:release-v5.3 idf.py --version` prints a
-5.3.x version, and `esptool version` works.
+Check before the day: `docker run --rm espressif/idf:release-v6.1 idf.py --version` prints a
+v6.1 version, and `esptool version` works.
 
 ## Timetable
 

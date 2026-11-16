@@ -6,7 +6,7 @@ already use. This site holds the workshop material; the plugin itself lives in t
 
 ## Before the workshop
 
-1. Install Docker and pull the toolchain: `docker pull espressif/idf:release-v5.3`
+1. Install Docker and pull the toolchain: `docker pull espressif/idf:release-v6.1`
 2. `pip install esptool`
 3. Bring a USB-C **data** cable. A random USB-C charging cable will not work.
 4. Bring a working AI coding tool (Codex, Claude, Cursor, Pi, OpenCode etc.). We will be working in a terminal.

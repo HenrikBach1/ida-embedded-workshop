@@ -94,8 +94,8 @@ GPIO 8 and 7 and mention that it is not a quadrature encoder. If it guesses, the
 **Docker (build)**
 
 ```bash
-docker pull espressif/idf:release-v5.3     # ~4.5 GB, do this before the workshop
-docker run --rm espressif/idf:release-v5.3 idf.py --version
+docker pull espressif/idf:release-v6.1     # ~4.2 GB, do this before the workshop
+docker run --rm espressif/idf:release-v6.1 idf.py --version
 ```
 
 The template's `scripts/build.sh` runs `idf.py build` in this image. You never need a native

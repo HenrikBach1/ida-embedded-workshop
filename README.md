@@ -110,7 +110,7 @@ written to work that way.
 
 ## Toolchain
 
-- Docker with `espressif/idf:release-v5.3` pulled (`docker pull espressif/idf:release-v5.3`).
+- Docker with `espressif/idf:release-v6.1` pulled (`docker pull espressif/idf:release-v6.1`).
 - `pip install esptool` on the host. Flashing happens on the host, never inside the container.
 - A USB-C **data** cable. The board enumerates as `303a:1001` (ESP32-S3 USB JTAG/serial) in one
   plug orientation and as `1a86:7523` (the sidecar's CH340) in the other. Flip the plug for the S3.
