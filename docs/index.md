@@ -2,7 +2,7 @@
 
 Build firmware for the Guition JC3636K518C round knob display with the AI coding tool you
 already use. This site holds the workshop material; the plugin itself lives in the
-[repository](https://github.com/dalager/ida-embedded-workshop).
+[repository](https://github.com/HenrikBach1/ida-embedded-workshop).
 
 ## Before the workshop
 

@@ -28,6 +28,19 @@ static void reply_state(void)
     fflush(stdout);
 }
 
+static bool snap_write(const void *data, size_t len)
+{
+    const uint8_t *bytes = (const uint8_t *)data;
+    size_t written = 0;
+    while (written < len) {
+        int n = usb_serial_jtag_write_bytes(bytes + written, len - written,
+                                            pdMS_TO_TICKS(2000));
+        if (n <= 0) return false;
+        written += (size_t)n;
+    }
+    return true;
+}
+
 // Snapshot the active screen into a PSRAM buffer and stream it as base64 rows.
 static void do_snap(void)
 {
@@ -53,21 +66,37 @@ static void do_snap(void)
     // One base64 row per line, each written in ONE call so a log line from another task cannot
     // land inside it; logging is muted for the duration of the dump for the same reason.
     size_t b64_cap = ((stride + 2) / 3) * 4 + 1;
-    unsigned char *row = malloc(2 + b64_cap + 2);
+    unsigned char *row = malloc(16 + b64_cap + 2);
     if (!row) { printf("> error no memory for base64\n"); fflush(stdout); return; }
     esp_log_level_t saved = esp_log_level_get("*");
     esp_log_level_set("*", ESP_LOG_NONE);
-    printf("SNAP BEGIN %u %u RGB565\n", (unsigned)w, (unsigned)h);
-    fflush(stdout);
+    char header[64];
+    int header_len = snprintf(header, sizeof(header), "SNAP BEGIN %u %u RGB565\n",
+                              (unsigned)w, (unsigned)h);
+    if (header_len < 0 || (size_t)header_len >= sizeof(header) ||
+        !snap_write(header, (size_t)header_len)) {
+        esp_log_level_set("*", saved);
+        free(row);
+        printf("> error snapshot header write\n");
+        fflush(stdout);
+        return;
+    }
     for (uint32_t y = 0; y < h; y++) {
         size_t olen = 0;
-        row[0] = 'S'; row[1] = ':';
-        mbedtls_base64_encode(row + 2, b64_cap, &olen, s_pixels + (size_t)y * stride, w * 2);
-        row[2 + olen] = '\n';
-        fwrite(row, 1, 3 + olen, stdout);
+        int prefix = snprintf((char *)row, 16, "S:%u:", (unsigned)y);
+        if (prefix < 0 || prefix >= 16) continue;
+        mbedtls_base64_encode(row + prefix, b64_cap, &olen,
+                              s_pixels + (size_t)y * stride, w * 2);
+        row[prefix + olen] = '\n';
+        if (!snap_write(row, prefix + olen + 1)) {
+            esp_log_level_set("*", saved);
+            free(row);
+            printf("> error snapshot row write\n");
+            fflush(stdout);
+            return;
+        }
     }
-    printf("SNAP END\n");
-    fflush(stdout);
+    snap_write("SNAP END\n", 9);
     esp_log_level_set("*", saved);
     free(row);
 }
@@ -117,7 +146,7 @@ static void testctl_task(void *arg)
 
 void testctl_init(void)
 {
-    usb_serial_jtag_driver_config_t cfg = { .rx_buffer_size = 1024, .tx_buffer_size = 4096 };
+    usb_serial_jtag_driver_config_t cfg = { .rx_buffer_size = 1024, .tx_buffer_size = 16384 };
     esp_err_t err = usb_serial_jtag_driver_install(&cfg);
     if (err != ESP_OK) { ESP_LOGE(TAG, "usb_serial_jtag driver: %s", esp_err_to_name(err)); return; }
     usb_serial_jtag_vfs_use_driver();   // stdout now goes through the driver too (blocking, ordered)

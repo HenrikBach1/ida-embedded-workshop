@@ -44,41 +44,41 @@ frame that never reached the glass when nobody is looking at the knob:
 **Claude Code**
 
 ```
-/plugin marketplace add dalager/ida-embedded-workshop
+/plugin marketplace add HenrikBach1/ida-embedded-workshop
 /plugin install ida-embedded-workshop@ida-embedded-workshop
 ```
 
 **Codex**
 
 ```bash
-codex plugin marketplace add dalager/ida-embedded-workshop
+codex plugin marketplace add HenrikBach1/ida-embedded-workshop
 codex plugin add ida-embedded-workshop@ida-embedded-workshop
 ```
 
 **GitHub Copilot CLI**
 
 ```bash
-copilot plugin marketplace add dalager/ida-embedded-workshop
+copilot plugin marketplace add HenrikBach1/ida-embedded-workshop
 copilot plugin install ida-embedded-workshop@ida-embedded-workshop
 ```
 
 **Factory Droid**
 
 ```bash
-droid plugin marketplace add dalager/ida-embedded-workshop
+droid plugin marketplace add HenrikBach1/ida-embedded-workshop
 droid plugin install ida-embedded-workshop@ida-embedded-workshop --scope user
 ```
 
 **Pi**
 
 ```bash
-pi install https://github.com/dalager/ida-embedded-workshop
+pi install https://github.com/HenrikBach1/ida-embedded-workshop
 ```
 
 **OpenCode** (2.x, checked on 2.3.0)
 
 ```bash
-git clone https://github.com/dalager/ida-embedded-workshop ~/ida-embedded-workshop
+git clone https://github.com/HenrikBach1/ida-embedded-workshop ~/ida-embedded-workshop
 ```
 
 Then add the skills folder to `~/.config/opencode/opencode.json` (`opencode debug paths` shows
@@ -99,7 +99,7 @@ for skills (`opencode plugin add` is for code plugins), and it also reads `~/.ag
 **Cursor, Kiro, Cline, or anything that reads Agent Skills**
 
 ```bash
-git clone https://github.com/dalager/ida-embedded-workshop ~/ida-embedded-workshop
+git clone https://github.com/HenrikBach1/ida-embedded-workshop ~/ida-embedded-workshop
 for d in ~/.agents/skills ~/.cursor/skills ~/.kiro/skills ~/.config/opencode/skills ~/.cline/skills ~/.copilot/skills ~/.claude/skills; do
   mkdir -p "$d" && for s in ~/ida-embedded-workshop/skills/*/; do ln -sfn "$s" "$d/$(basename "$s")"; done
 done
@@ -135,7 +135,7 @@ Then ask your AI tool to take you up the exercise ladder in `skills/scaffold-kno
 ## Workshop material
 
 The workshop site with agenda, device cheat-sheet, install card and exercise ladder is at
-https://dalager.github.io/ida-embedded-workshop/.
+https://HenrikBach1.github.io/ida-embedded-workshop/.
 
 ## Licence
 

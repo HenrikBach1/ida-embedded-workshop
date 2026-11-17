@@ -23,15 +23,18 @@ PORT = os.environ.get("KNOB_PORT", "/dev/ttyACM0")
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 def open_port():
-    s = serial.Serial(PORT, 115200, timeout=0.2)
+    s = serial.Serial(PORT, 115200, timeout=2.0)
     s.reset_input_buffer()
     return s
 
 def read_line(s, deadline):
+    pending = bytearray()
     while time.time() < deadline:
-        raw = s.readline()
+        raw = s.read_until(b"\n", size=4096)
         if raw:
-            return ANSI.sub("", raw.decode(errors="replace")).rstrip("\r\n")
+            pending.extend(raw)
+            if pending.endswith(b"\n"):
+                return ANSI.sub("", pending.decode(errors="replace")).rstrip("\r\n")
     return None
 
 def command(s, cmd, timeout=3.0):
@@ -57,8 +60,17 @@ def snap(s, out_png, timeout=30.0):
         if line.startswith("SNAP BEGIN"):
             _, _, w, h, _fmt = line.split(); w, h = int(w), int(h)
         elif line.startswith("S:"):
+            parts = line.split(":", 2)
+            if len(parts) != 3:
+                return "corrupt row %d (missing row framing)" % len(rows)
             try:
-                row = base64.b64decode(line[2:].encode("ascii"), validate=True)
+                row_number = int(parts[1], 10)
+            except ValueError:
+                return "corrupt row %d (invalid row number)" % len(rows)
+            if row_number != len(rows):
+                return "corrupt row %d (got row %d)" % (len(rows), row_number)
+            try:
+                row = base64.b64decode(parts[2].encode("ascii"), validate=True)
             except (ValueError, UnicodeEncodeError):
                 return "corrupt row %d (log noise in the stream?)" % len(rows)
             if w and len(row) != w * 2: return "row %d has %d bytes, expected %d" % (len(rows), len(row), w * 2)

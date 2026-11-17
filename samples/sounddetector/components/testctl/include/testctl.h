@@ -6,7 +6,7 @@
 //   hold           inject one long press                      -> "> state=... counter=..."
 //   reset          back to boot state (idle, counter 0)       -> "> state=idle counter=0"
 //   state          report the model                           -> "> state=... counter=..."
-//   snap           dump the framebuffer: "SNAP BEGIN w h RGB565", 1 row per "S:<base64>" line,
+//   snap           dump the framebuffer: "SNAP BEGIN w h RGB565", 1 row per "S:<y>:<base64>" line,
 //                  "SNAP END" (logging is muted meanwhile)
 //   ping           -> "> pong"
 // Depends on app (the app_inject_* hooks) and ui (the LVGL lock). Compiled only with

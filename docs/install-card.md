@@ -1,6 +1,6 @@
 # Install card — plugin + toolchain
 
-Repo: `https://github.com/dalager/ida-embedded-workshop`. The plugin is nine plain-Markdown skills plus a
+Repo: `https://github.com/HenrikBach1/ida-embedded-workshop`. The plugin is nine plain-Markdown skills plus a
 starter template; it needs nothing Claude-specific and works in any Agent-Skills-aware tool.
 
 ## 1. Install the plugin in your AI tool
@@ -8,7 +8,7 @@ starter template; it needs nothing Claude-specific and works in any Agent-Skills
 **Claude Code**
 
 ```
-/plugin marketplace add dalager/ida-embedded-workshop
+/plugin marketplace add HenrikBach1/ida-embedded-workshop
 /plugin install ida-embedded-workshop@ida-embedded-workshop
 ```
 
@@ -17,7 +17,7 @@ Then `/reload-plugins` (or start a new session). Check with `/plugin` → Instal
 **Codex**
 
 ```bash
-codex plugin marketplace add dalager/ida-embedded-workshop
+codex plugin marketplace add HenrikBach1/ida-embedded-workshop
 codex plugin add ida-embedded-workshop@ida-embedded-workshop
 ```
 
@@ -26,27 +26,27 @@ Start a new session. `codex plugin marketplace upgrade ida-embedded-workshop` fe
 **GitHub Copilot CLI**
 
 ```bash
-copilot plugin marketplace add dalager/ida-embedded-workshop
+copilot plugin marketplace add HenrikBach1/ida-embedded-workshop
 copilot plugin install ida-embedded-workshop@ida-embedded-workshop
 copilot skill list        # should list the nine ida-embedded-workshop skills
 ```
 
 **Cursor**
 
-Cursor → Settings → Plugins → *Install from repository* → `https://github.com/dalager/ida-embedded-workshop`.
+Cursor → Settings → Plugins → *Install from repository* → `https://github.com/HenrikBach1/ida-embedded-workshop`.
 Or use the symlink fallback below into `~/.cursor/skills`.
 
 **Factory Droid**
 
 ```bash
-droid plugin marketplace add dalager/ida-embedded-workshop
+droid plugin marketplace add HenrikBach1/ida-embedded-workshop
 droid plugin install ida-embedded-workshop@ida-embedded-workshop --scope user
 ```
 
 **Pi**
 
 ```bash
-pi install https://github.com/dalager/ida-embedded-workshop
+pi install https://github.com/HenrikBach1/ida-embedded-workshop
 ```
 
 Then `/reload` in an open session; `/skill:scaffold-knob-firmware` invokes a skill explicitly.
@@ -54,7 +54,7 @@ Then `/reload` in an open session; `/skill:scaffold-knob-firmware` invokes a ski
 **OpenCode** (2.x, checked on 2.3.0)
 
 ```bash
-git clone https://github.com/dalager/ida-embedded-workshop ~/ida-embedded-workshop
+git clone https://github.com/HenrikBach1/ida-embedded-workshop ~/ida-embedded-workshop
 ```
 
 Then add the skills folder to `~/.config/opencode/opencode.json` (`opencode debug paths` shows
@@ -75,7 +75,7 @@ for skills (`opencode plugin add` is for code plugins), and it also reads `~/.ag
 **Universal fallback (any tool, including Kiro, Cline)**
 
 ```bash
-git clone https://github.com/dalager/ida-embedded-workshop ~/ida-embedded-workshop
+git clone https://github.com/HenrikBach1/ida-embedded-workshop ~/ida-embedded-workshop
 # pick the directory your tool scans; one or more of:
 for d in ~/.agents/skills ~/.copilot/skills ~/.cursor/skills ~/.config/opencode/skills \
          ~/.kiro/skills ~/.claude/skills; do
@@ -144,7 +144,7 @@ host terminal. If the port is missing, `system_profiler SPUSBDataType | grep -A3
 ## 3. Smoke test (five minutes, before the first exercise)
 
 ```bash
-git clone https://github.com/dalager/ida-embedded-workshop
+git clone https://github.com/HenrikBach1/ida-embedded-workshop
 cp -r ida-embedded-workshop/templates/knob-starter ~/my-knob && cd ~/my-knob
 cp components/net/include/wifi_secrets.example.h components/net/include/wifi_secrets.h
 scripts/build.sh             # Docker; first run downloads managed components
