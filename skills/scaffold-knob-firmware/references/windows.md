@@ -25,11 +25,13 @@ Docker volumes, and copy the three `.bin` files back out.
 
 ```powershell
 docker pull espressif/idf:release-v5.3      # ~4.5 GB, do it before the workshop
-python -m pip install esptool pyserial      # pyserial is what scripts/testctl.py uses
+python -m pip install esptool               # brings pyserial, which scripts/testctl.py uses
 python -m esptool version
 ```
 
 Docker Desktop must be running. No `gcc`, no `lsusb`, no native ESP-IDF, no WSL shell needed.
+pyserial is a dependency of esptool, so it needs no separate install as long as `testctl.py`
+runs under the same `python` that esptool was installed into.
 If `python` is not found, try `python3` or `py`.
 
 ## 1. Find the board
@@ -156,4 +158,5 @@ with `core.autocrlf=true` gives the `.sh` files CRLF, and bash then fails with
 | `set: pipefail: invalid option name`               | CRLF in a `.sh` file; see step 7                                           |
 | `could not open port 'COM5'` / access denied       | A serial monitor or another tool holds the port                            |
 | `testctl.py`: no reply from `/dev/ttyACM0`         | `$env:KNOB_PORT` is not set in this shell                                  |
+| `testctl.py`: `pyserial is missing for this Python` | esptool lives in another Python or in pipx; run the command it prints      |
 | `scripts/verify-screens.sh`                        | Not tried on Windows; run the `testctl.py` verbs it wraps by hand          |

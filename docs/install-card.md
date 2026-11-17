@@ -104,7 +104,7 @@ ESP-IDF install. The container cannot see USB; it only builds.
 **esptool (flash, on the host)**
 
 ```bash
-pip install --upgrade esptool      # or pipx install esptool
+pip install --upgrade esptool      # use pip, not pipx: the test console script shares its pyserial
 esptool version
 ```
 

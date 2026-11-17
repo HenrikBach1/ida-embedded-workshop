@@ -56,6 +56,11 @@ scripts/testctl.py snap out.png        # PNG via ffmpeg
 scripts/verify-screens.sh [out_dir]    # scripted walk: assert model, snap; exit 1 on mismatch
 ```
 
+`testctl.py` imports pyserial. A pip-installed esptool brings it along, so it is normally
+there; with esptool from pipx or a second Python it is not, and the script exits with the
+install command (`python3 -m pip install pyserial`). Run that yourself and carry on; it is not
+a question for the person.
+
 Rules the console follows, keep them when you extend it:
 
 - **Inject on the LVGL task or under `ui_lock()`**: the handlers touch widgets.

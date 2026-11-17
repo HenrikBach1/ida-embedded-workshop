@@ -23,6 +23,7 @@ HTTP upload, and host tests. Copy it, confirm it runs, then change one thing at 
 |---|---|
 | Docker with the IDF image | `docker pull espressif/idf:release-v5.3` |
 | esptool on the host | `pip install esptool` → `esptool version` |
+| pyserial for `scripts/testctl.py` | `python3 -c "import serial"`; comes with pip-installed esptool. If it fails (esptool from pipx, another Python), run `python3 -m pip install pyserial` yourself; do not hand it to the person |
 | gcc for host tests | `gcc --version` |
 | The board on the S3 side of USB | `lsusb \| grep 303a` and `ls /dev/ttyACM0` (flip the plug if you see `1a86:7523`) |
 | Python 3 for the receiver | `python3 --version` |

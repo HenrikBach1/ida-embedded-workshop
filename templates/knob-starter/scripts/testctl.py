@@ -8,7 +8,12 @@
 Exit code 0 on a "> ..." reply, 1 on timeout/error. Opens the port only for the call so the
 camera capture and other readers can use it between calls."""
 import base64, os, re, subprocess, sys, tempfile, time
-import serial
+try:
+    import serial
+except ImportError:
+    sys.exit(f"pyserial is missing for this Python. Install it with:\n"
+             f"  {sys.executable} -m pip install pyserial\n"
+             "(pip-installed esptool brings it along; a pipx-installed esptool does not.)")
 
 PORT = os.environ.get("KNOB_PORT", "/dev/ttyACM0")
 ANSI = re.compile(r"\x1b\[[0-9;]*m")
