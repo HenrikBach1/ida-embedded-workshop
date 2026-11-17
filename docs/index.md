@@ -11,6 +11,8 @@ already use. This site holds the workshop material; the plugin itself lives in t
 3. Bring a USB-C **data** cable. A random USB-C charging cable will not work.
 4. Bring a working AI coding tool (Codex, Claude, Cursor, Pi, OpenCode etc.). We will be working in a terminal.
 5. Install the skills/plugin: see the [install card](install-card.html).
+6. On Windows: read the [Windows quick start](skills/scaffold-knob-firmware/references/windows.html).
+   It turns a first build of more than 25 minutes into one and a half.
 
 ## Handouts
 

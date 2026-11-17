@@ -94,8 +94,12 @@ full flash, an app-only flash (just the `0x10000` image) is enough for code chan
 - **First flash must be over USB**: the 16 MB custom partition table (factory 9 MB + spiffs 4 MB,
   no OTA slots) cannot be applied any other way.
 - If the port is missing: plug a USB-C **data** cable, flip it, or hold BOOT while plugging in.
-- The vendor firmware is the only copy of itself. Back it up before the first flash:
+- **Optional: back up the vendor firmware.** The first flash erases the factory demo and the
+  unit holds the only copy. Reading it back takes about 30 minutes (16 MB at 75 kbit/s with
+  `--no-stub`), so ask the person first and skip it unless they want the demo back one day:
   `esptool --chip esp32s3 --port /dev/ttyACM0 --no-stub read_flash 0 0x1000000 stock.bin`.
+- On Windows the port is `COMx` and the commands differ slightly; see
+  `references/windows.md` in the `scaffold-knob-firmware` skill.
 - Monitor with `idf.py monitor -p /dev/ttyACM0` from the host or any serial terminal at 115200.
 
 ## Gotchas that cost real time

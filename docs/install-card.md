@@ -127,6 +127,11 @@ host terminal. If the port is missing, `system_profiler SPUSBDataType | grep -A3
 
 **Windows**
 
+- **Follow the [Windows quick start](skills/scaffold-knob-firmware/references/windows.html)
+  instead of the `scripts/*.sh` commands in section 3.** It keeps the build tree on a Docker
+  volume: a first build took 1 min 30 s that way, against more than 25 minutes with the build
+  tree on the Windows folder. Your AI tool picks the same guide up through the
+  `scaffold-knob-firmware` skill.
 - Use Docker Desktop (WSL 2 backend) for the build; flash from a PowerShell on the host.
 - Windows 11 detects the USB JTAG/serial unit by itself (reported by a participant; no driver
   install). Windows 10 usually needs the Espressif driver: install it with Zadig (select the
@@ -148,3 +153,10 @@ scripts/flash.sh /dev/ttyACM0
 ```
 
 A teal screen with a label means you are ready for rung 1.
+
+On Windows, use the [Windows quick start](skills/scaffold-knob-firmware/references/windows.html)
+for these steps.
+
+The first flash erases the vendor demo firmware. Backing it up first is optional and takes
+about 30 minutes; most people skip it. The command is in the
+[device skill](skills/jc3636k518-device/SKILL.html).

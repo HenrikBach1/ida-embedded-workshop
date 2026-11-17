@@ -126,6 +126,10 @@ cp components/net/include/wifi_secrets.example.h components/net/include/wifi_sec
 python3 ~/ida-embedded-workshop/templates/receiver/receiver.py --port 8080   # for the upload exercise
 ```
 
+On Windows the `.sh` scripts do not apply; use the PowerShell commands in
+`skills/scaffold-knob-firmware/references/windows.md`, which also keep the build tree off the
+Windows folder (a first build in 1 min 30 s where the bind-mounted one took more than 25).
+
 Then ask your AI tool to take you up the exercise ladder in `skills/scaffold-knob-firmware`.
 
 ## Workshop material

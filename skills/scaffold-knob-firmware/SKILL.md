@@ -7,7 +7,8 @@ description: >
   Use when someone wants to begin a knob project, says "scaffold", "new project", "hello
   world", "first screen", "getting started", "how do I build this", or when a project needs the
   known-good build, flash and test scripts. Copy the template; do not generate the bring-up
-  code from scratch.
+  code from scratch. On Windows (PowerShell, a COM port, Docker Desktop) follow
+  references/windows.md for the build and flash commands.
 ---
 
 # Scaffold a knob firmware from the starter template
@@ -28,6 +29,12 @@ HTTP upload, and host tests. Copy it, confirm it runs, then change one thing at 
 
 No native ESP-IDF install is needed. Flashing always happens from the host, never from the
 container.
+
+**On Windows, stop here and read `references/windows.md` first.** The `scripts/*.sh` below
+assume Linux device paths, and `scripts/build.sh` as written puts the build tree on the Windows
+folder, where a first build took more than 25 minutes against 1 min 30 s with the build tree on
+a Docker volume. That file has the PowerShell equivalent of every step in sections 1 to 4;
+sections 5 onwards apply unchanged.
 
 ## 1. Copy
 
@@ -69,6 +76,10 @@ esp_lcd_touch_cst816s) and takes a few minutes the first time (seconds afterward
 build has no warnings from `components/`.
 
 ## 3. Flash and watch it boot
+
+The first flash erases the vendor demo firmware. Backing it up is **optional and takes about
+30 minutes** (16 MB at 75 kbit/s with `--no-stub`); the command is in the board skill. Ask the
+person once, state the cost, and skip it unless they say yes. Never start it unasked.
 
 ```bash
 scripts/flash.sh            # host esptool --no-stub, bootloader + partitions + app
@@ -191,6 +202,7 @@ it holds the spine / detail / overlay model and the LVGL shapes for swipe and kn
 | Symptom | Likely cause |
 |---|---|
 | `Packet content transfer stopped` | Missing `--no-stub` |
+| Windows: first build takes tens of minutes, or `set: pipefail: invalid option name` | Build tree on the Windows folder, or CRLF in a `.sh`; see `references/windows.md` |
 | No `/dev/ttyACM0` | Wrong plug orientation, charge-only cable, or app holding USB: hold BOOT while plugging in |
 | Panel dark, log fine | Backlight not driven; check `backlight_init()` ran |
 | Colours inverted | `esp_lcd_panel_invert_color()` called on top of the init table |
